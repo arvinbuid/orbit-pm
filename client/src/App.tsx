@@ -1,8 +1,14 @@
+import { Routes, Route } from "react-router-dom";
+import Layout from "./pages/Layout";
+
 function App() {
   return (
-    <div>
-      <h1 className="text-4xl">Project Management System</h1>
-    </div>
+    <>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+        </Route>
+      </Routes>
+    </>
   )
 }
 
