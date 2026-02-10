@@ -1,21 +1,15 @@
 import { useEffect, useState } from 'react'
-import Sidebar from '../components/Sidebar'
-import { useDispatch, useSelector } from 'react-redux'
 import { loadTheme } from '../features/themeSlice';
 import { Loader2Icon } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar';
-
-interface RootState {
-    workspace: {
-        loading: boolean
-    }
-}
 
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const { loading } = useSelector((state: RootState) => state.workspace)
-    const dispatch = useDispatch()
+    const { loading } = useAppSelector(state => state.workspace)
+    const dispatch = useAppDispatch();
 
     // Initial load of theme
     useEffect(() => {

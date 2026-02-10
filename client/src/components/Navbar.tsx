@@ -1,12 +1,8 @@
 import { SearchIcon, PanelLeft } from 'lucide-react'
-import { useDispatch, useSelector } from 'react-redux'
 import { toggleTheme } from '../features/themeSlice'
 import { MoonIcon, SunIcon } from 'lucide-react'
 import { assets } from '../assets/assets'
-
-interface RootState {
-    theme: string;
-}
+import { useAppDispatch, useAppSelector } from '../app/hooks';
 
 interface NavbarProps {
     isSidebarOpen: boolean;
@@ -14,9 +10,8 @@ interface NavbarProps {
 }
 
 const Navbar = ({ setIsSidebarOpen }: NavbarProps) => {
-
-    const dispatch = useDispatch();
-    const theme = useSelector((state: RootState) => state.theme);
+    const dispatch = useAppDispatch();
+    const theme = useAppSelector(state => state.theme);
 
     return (
         <div className="w-full bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 px-6 xl:px-16 py-3 shrink-0">
@@ -44,7 +39,7 @@ const Navbar = ({ setIsSidebarOpen }: NavbarProps) => {
                     {/* Theme Toggle */}
                     <button onClick={() => dispatch(toggleTheme())} className="size-8 flex items-center justify-center bg-white dark:bg-zinc-800 shadow rounded-lg transition hover:scale-105 active:scale-95">
                         {
-                            theme === "light"
+                            theme.theme === "light"
                                 ? (<MoonIcon className="size-4 text-gray-800 dark:text-gray-200" />)
                                 : (<SunIcon className="size-4 text-yellow-400" />)
                         }
