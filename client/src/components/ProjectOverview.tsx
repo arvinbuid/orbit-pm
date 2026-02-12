@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ArrowRight, Calendar, UsersIcon, FolderOpen } from "lucide-react";
 import { useAppSelector } from "../app/hooks";
+import CreateNewProjectForm from "./CreateNewProjectForm";
 
 const STATUSCOLORS = {
     PLANNING: "bg-zinc-200 text-zinc-800 dark:bg-zinc-600 dark:text-zinc-200",
@@ -37,7 +38,7 @@ const ProjectOverview = () => {
             </div>
 
             <div className="p-0">
-                {projects.length === 0 ? (
+                {projects.length > 0 ? (
                     <div className="p-12 text-center">
                         <div className="w-16 h-16 mx-auto mb-4 bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-500 rounded-full flex items-center justify-center">
                             <FolderOpen size={32} />
@@ -47,7 +48,7 @@ const ProjectOverview = () => {
                             Create your First Project
                         </button>
 
-                        {/* Create New Project Dialog Component Here */}
+                        <CreateNewProjectForm isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
 
                     </div>
                 ) : (

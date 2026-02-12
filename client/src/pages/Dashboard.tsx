@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import StatsGrid from "../components/StatsGrid";
 import ProjectOverview from "../components/ProjectOverview";
+import CreateNewProjectForm from "../components/CreateNewProjectForm";
 
 const Dashboard = () => {
     const user = { fullName: 'Daryl Dixon' } // HARDCODED FOR NOW!
@@ -19,7 +20,7 @@ const Dashboard = () => {
                     <Plus size={16} /> New Project
                 </button>
 
-                {/* Create NewProject Dialog Component */}
+                <CreateNewProjectForm isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
             </div>
 
             <StatsGrid />
