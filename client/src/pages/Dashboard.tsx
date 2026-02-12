@@ -3,6 +3,7 @@ import { useState } from "react";
 import StatsGrid from "../components/StatsGrid";
 import ProjectOverview from "../components/ProjectOverview";
 import CreateNewProjectForm from "../components/CreateNewProjectForm";
+import RecentActivity from "../components/RecentActivity";
 
 const Dashboard = () => {
     const user = { fullName: 'Daryl Dixon' } // HARDCODED FOR NOW!
@@ -28,7 +29,7 @@ const Dashboard = () => {
             <div className="grid lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
                     <ProjectOverview />
-                    {/* Recent Activity Component */}
+                    <RecentActivity />
                 </div>
                 <div>
                     {/* Tasks Summary Component */}
