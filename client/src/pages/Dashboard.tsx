@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import StatsGrid from "../components/StatsGrid";
+import ProjectOverview from "../components/ProjectOverview";
 
 const Dashboard = () => {
     const user = { fullName: 'Daryl Dixon' } // HARDCODED FOR NOW!
@@ -25,7 +26,7 @@ const Dashboard = () => {
 
             <div className="grid lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
-                    {/* Project Overview Component */}
+                    <ProjectOverview />
                     {/* Recent Activity Component */}
                 </div>
                 <div>
