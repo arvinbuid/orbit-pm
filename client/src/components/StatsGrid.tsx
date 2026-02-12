@@ -17,34 +17,30 @@ const StatsGrid = () => {
 
         if (!currentWorkspace) return dashboardStats;
 
+        const totalProjects = currentWorkspace.projects.length;
+        const activeProjects = currentWorkspace.projects.filter(
+            (p) => p.status !== "CANCELLED" && p.status !== "COMPLETED").length;
+        const completedProjects = currentWorkspace.projects
+            .filter((p) => p.status === "COMPLETED")
+            .reduce((acc, project) => acc + project.tasks.length, 0);
+        const myTasks = currentWorkspace.projects
+            .reduce((acc, project) => acc + project.tasks
+                .filter((t) => t.assignee.email === currentWorkspace.owner.email).length, 0);
+        const overdueIssues = currentWorkspace.projects
+            .reduce((acc, project) => acc + project.tasks
+                .filter((task) => {
+                    if (task.due_date < new Date().toISOString()) {
+                        return true
+                    }
+                    return false
+                }).length, 0);
         return {
-            totalProjects: currentWorkspace.projects.length,
-            activeProjects: currentWorkspace.projects.filter(
-                (p) => p.status !== "CANCELLED" && p.status !== "COMPLETED"
-            ).length,
-            completedProjects: currentWorkspace.projects
-                .filter((p) => p.status === "COMPLETED")
-                .reduce((acc, project) => acc + project.tasks.length, 0),
-            myTasks: currentWorkspace.projects.reduce(
-                (acc, project) =>
-                    acc +
-                    project.tasks.filter(
-                        (t) => t.assignee.email === currentWorkspace.owner.email
-                    ).length,
-                0
-            ),
-            overdueIssues: currentWorkspace.projects.reduce(
-                (acc, project) =>
-                    acc + project.tasks.filter((task) => {
-                        if (task.due_date < new Date().toISOString()) {
-                            return true
-                        }
-                        return false
-                    }).length,
-                0
-            ),
+            totalProjects,
+            activeProjects,
+            completedProjects,
+            myTasks,
+            overdueIssues
         }
-
     }, [currentWorkspace])
 
     const statCards = [
