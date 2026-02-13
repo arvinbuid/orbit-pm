@@ -1,45 +1,11 @@
-import { useEffect, useState } from "react";
 import { useAppSelector } from "../app/hooks";
 import { ArrowRight, Clock, AlertTriangle, User } from "lucide-react";
-
-type Task = {
-    id: string;
-    projectId: string;
-    title: string;
-    description: string;
-    status: string;
-    type: string;
-    priority: string;
-    assigneeId: string;
-    due_date: string;
-    createdAt: string;
-    updatedAt: string;
-    assignee: {
-        id: string;
-        name: string;
-        email: string;
-        image: string;
-        createdAt: string;
-        updatedAt: string;
-    };
-    comments: string[];
-};
 
 
 const TaskSummary = () => {
     const user = { id: 'Daryl Dixon' }
-    const [tasks, setTasks] = useState<Task[]>([]);
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
-
-    // Get all tasks for all projects in current workspace
-    useEffect(() => {
-        const fetchUserTasks = () => {
-            if (!currentWorkspace) throw new Error('User or workspace not found!');
-            const currentWorkspaceTasks = currentWorkspace.projects.flatMap((project) => project.tasks);
-            setTasks(currentWorkspaceTasks);
-        };
-        fetchUserTasks();
-    }, [currentWorkspace]);
+    const tasks = currentWorkspace.projects.flatMap((project) => project.tasks) || [];
 
     const myTasks = tasks.filter(i => i.assigneeId === user.id);
     const overdueTasks = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'DONE');
