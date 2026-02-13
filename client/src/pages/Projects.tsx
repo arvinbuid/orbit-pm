@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAppSelector } from "../app/hooks";
 import { Plus, Search, FolderOpen } from "lucide-react";
 import CreateNewProjectForm from "../components/CreateNewProjectForm";
+import ProjectCard from "../components/ProjectCard";
 
 type FilteredProduct = {
     id: string;
@@ -121,8 +122,7 @@ const Projects = () => {
                     </div>
                 ) : (
                     filteredProjects.map((project) => (
-                        // Project Card Component
-                        <></>
+                        <ProjectCard key={project.id} project={project} />
                     ))
                 )}
             </div>
