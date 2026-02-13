@@ -4,6 +4,7 @@ import StatsGrid from "../components/StatsGrid";
 import ProjectOverview from "../components/ProjectOverview";
 import CreateNewProjectForm from "../components/CreateNewProjectForm";
 import RecentActivity from "../components/RecentActivity";
+import TaskSummary from "../components/TaskSummary";
 
 const Dashboard = () => {
     const user = { fullName: 'Daryl Dixon' } // HARDCODED FOR NOW!
@@ -32,7 +33,7 @@ const Dashboard = () => {
                     <RecentActivity />
                 </div>
                 <div>
-                    {/* Tasks Summary Component */}
+                    <TaskSummary />
                 </div>
             </div>
         </div>
