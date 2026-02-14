@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAppSelector } from '../app/hooks';
 import { Activity, Search, Shield, UserPlus, UsersIcon } from 'lucide-react';
+import InviteMemberDialog from '../components/InviteMemberDialog';
 
 const Team = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -28,9 +29,7 @@ const Team = () => {
                 <button onClick={() => setIsDialogOpen(true)} className="flex items-center px-5 py-2 rounded text-sm bg-linear-to-br from-blue-500 to-blue-600 hover:opacity-90 text-white transition" >
                     <UserPlus className="w-4 h-4 mr-2" /> Invite Member
                 </button>
-
-                {/* Invite Member Component TODO */}
-
+                <InviteMemberDialog isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
             </div>
 
             <div className="flex flex-wrap gap-4">
