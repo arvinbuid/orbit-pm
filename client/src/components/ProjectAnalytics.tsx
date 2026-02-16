@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, type PieSectorShapeProps, Sector } from "recharts";
 import { CheckCircle, Clock, AlertTriangle, Users, ArrowRightIcon } from "lucide-react";
-import type { Task } from "../types";
+import type { Project, Task } from "../types";
 
 // Colors for charts and priorities
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"] as const;
@@ -12,35 +12,7 @@ const PRIORITY_COLORS = {
 } as const;
 
 interface ProjectAnalyticsProps {
-    project: {
-        id: string;
-        name: string;
-        description: string;
-        priority: string;
-        status: string;
-        start_date: string;
-        end_date: string;
-        team_lead: string;
-        workspaceId: string;
-        progress: number;
-        createdAt: string;
-        updatedAt: string;
-        tasks: Array<Task>;
-        members:
-        {
-            id: string;
-            userId: string;
-            projectId: string;
-            user: {
-                id: string;
-                name: string;
-                email: string;
-                image: string;
-                createdAt: string;
-                updatedAt: string;
-            };
-        }[];
-    };
+    project: Project
     tasks: Array<Task>;
 }
 
