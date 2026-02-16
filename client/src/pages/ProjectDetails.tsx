@@ -2,6 +2,7 @@ import { useState, } from "react";
 import { useAppSelector } from "../app/hooks";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon } from "lucide-react";
+import ProjectTasks from "../components/ProjectTasks";
 
 const STATUSCOLORS = {
     PLANNING: "bg-zinc-200 text-zinc-900 dark:bg-zinc-600 dark:text-zinc-200",
@@ -118,7 +119,7 @@ const ProjectDetails = () => {
                 <div className="mt-6">
                     {activeTab === "tasks" && (
                         <div className=" dark:bg-zinc-900/40 rounded max-w-6xl">
-                            {/* ProjectTasks Component */}
+                            <ProjectTasks tasks={tasks} />
                         </div>
                     )}
                     {activeTab === "analytics" && (
