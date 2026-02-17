@@ -5,6 +5,7 @@ import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, Fil
 import ProjectTasks from "../components/ProjectTasks";
 import ProjectAnalytics from "../components/ProjectAnalytics";
 import ProjectCalendar from "../components/ProjectCalendar";
+import ProjectSettings from "../components/ProjectSettings"
 
 const STATUSCOLORS = {
     PLANNING: "bg-zinc-200 text-zinc-900 dark:bg-zinc-600 dark:text-zinc-200",
@@ -136,7 +137,7 @@ const ProjectDetails = () => {
                     )}
                     {activeTab === "settings" && (
                         <div className=" dark:bg-zinc-900/40 rounded max-w-6xl">
-                            {/* ProjectSettings */}
+                            <ProjectSettings project={project} />
                         </div>
                     )}
                 </div>
