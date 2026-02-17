@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { Plus, Save } from "lucide-react";
 import { useState } from "react";
 import type { Project } from "../types";
+import AddProjectMember from "./AddProjectMember";
 
 interface ProjectSettingsProps {
     project: Project;
@@ -151,7 +152,7 @@ const ProjectSettings = ({ project }: ProjectSettingsProps) => {
                         >
                             <Plus className="size-4 text-zinc-900 dark:text-zinc-300" />
                         </button>
-                        {/* AddProjectMember Component */}
+                        <AddProjectMember isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
                     </div>
 
                     {/* Member List */}
