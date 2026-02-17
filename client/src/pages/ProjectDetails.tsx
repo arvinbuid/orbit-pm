@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeftIcon, PlusIcon, SettingsIcon, BarChart3Icon, CalendarIcon, FileStackIcon, ZapIcon } from "lucide-react";
 import ProjectTasks from "../components/ProjectTasks";
 import ProjectAnalytics from "../components/ProjectAnalytics";
+import ProjectCalendar from "../components/ProjectCalendar";
 
 const STATUSCOLORS = {
     PLANNING: "bg-zinc-200 text-zinc-900 dark:bg-zinc-600 dark:text-zinc-200",
@@ -130,7 +131,7 @@ const ProjectDetails = () => {
                     )}
                     {activeTab === "calendar" && (
                         <div className=" dark:bg-zinc-900/40 rounded max-w-6xl">
-                            {/* ProjectCalendar Component */}
+                            <ProjectCalendar tasks={tasks} />
                         </div>
                     )}
                     {activeTab === "settings" && (
