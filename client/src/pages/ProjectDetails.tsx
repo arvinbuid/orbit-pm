@@ -6,6 +6,7 @@ import ProjectTasks from "../components/ProjectTasks";
 import ProjectAnalytics from "../components/ProjectAnalytics";
 import ProjectCalendar from "../components/ProjectCalendar";
 import ProjectSettings from "../components/ProjectSettings"
+import CreateTaskDialog from "../components/CreateTaskDialog";
 
 const STATUSCOLORS = {
     PLANNING: "bg-zinc-200 text-zinc-900 dark:bg-zinc-600 dark:text-zinc-200",
@@ -144,7 +145,7 @@ const ProjectDetails = () => {
             </div>
 
             {/* Create Task Modal */}
-            {showCreateTask && <>{/* CreateTaskComponent */}</>}
+            {showCreateTask && <CreateTaskDialog showCreateTask={showCreateTask} setShowCreateTask={setShowCreateTask} projectId={id} />}
         </div>
     );
 }
