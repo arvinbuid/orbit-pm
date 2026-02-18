@@ -1,8 +1,8 @@
 import { SearchIcon, PanelLeft } from 'lucide-react'
 import { toggleTheme } from '../features/themeSlice'
 import { MoonIcon, SunIcon } from 'lucide-react'
-import { assets } from '../assets/assets'
 import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { UserButton } from '@clerk/clerk-react';
 
 interface NavbarProps {
     isSidebarOpen: boolean;
@@ -46,7 +46,7 @@ const Navbar = ({ setIsSidebarOpen }: NavbarProps) => {
                     </button>
 
                     {/* User Button */}
-                    <img src={assets.profile_img_a} alt="User Avatar" className="size-7 rounded-full" />
+                    <UserButton />
                 </div>
             </div>
         </div>

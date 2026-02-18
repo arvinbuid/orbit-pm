@@ -5,22 +5,34 @@ import { Outlet } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar';
+import { SignIn, useUser, } from '@clerk/clerk-react';
 
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const { loading } = useAppSelector(state => state.workspace)
     const dispatch = useAppDispatch();
+    const { user } = useUser()
 
     // Initial load of theme
     useEffect(() => {
         dispatch(loadTheme())
     }, [dispatch])
 
-    if (loading) return (
-        <div className='flex items-center justify-center h-screen bg-white dark:bg-zinc-950'>
-            <Loader2Icon className="size-7 text-blue-500 animate-spin" />
-        </div>
-    )
+    if (!user) {
+        return (
+            <div className='flex items-center justify-center h-screen bg-white dark:bg-zinc-950'>
+                <SignIn />
+            </div>
+        )
+    }
+
+    if (loading) {
+        return (
+            <div className='flex items-center justify-center h-screen bg-white dark:bg-zinc-950'>
+                <Loader2Icon className="size-7 text-blue-500 animate-spin" />
+            </div>
+        )
+    }
 
     return (
         <div className="flex bg-white dark:bg-zinc-950 text-gray-900 dark:text-slate-100">
