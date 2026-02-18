@@ -77,25 +77,25 @@ const Projects = () => {
                 <select
                     value={filters.status}
                     onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                    className="px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white text-sm"
+                    className="px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white text-sm cursor-pointer"
                 >
-                    <option value="ALL">All Status</option>
-                    <option value="ACTIVE">Active</option>
-                    <option value="PLANNING">Planning</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="ON_HOLD">On Hold</option>
-                    <option value="CANCELLED">Cancelled</option>
+                    <option value="ALL" className="dark:text-zinc-900">All Status</option>
+                    <option value="ACTIVE" className="dark:text-zinc-900">Active</option>
+                    <option value="PLANNING" className="dark:text-zinc-900">Planning</option>
+                    <option value="COMPLETED" className="dark:text-zinc-900">Completed</option>
+                    <option value="ON_HOLD" className="dark:text-zinc-900">On Hold</option>
+                    <option value="CANCELLED" className="dark:text-zinc-900">Cancelled</option>
                 </select>
                 {/* Priority */}
                 <select
                     value={filters.priority}
                     onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-                    className="px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white text-sm"
+                    className="px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white text-sm cursor-pointer"
                 >
-                    <option value="ALL">All Priority</option>
-                    <option value="HIGH">High</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="LOW">Low</option>
+                    <option value="ALL" className="dark:text-zinc-900">All Priority</option>
+                    <option value="HIGH" className="dark:text-zinc-900">High</option>
+                    <option value="MEDIUM" className="dark:text-zinc-900">Medium</option>
+                    <option value="LOW" className="dark:text-zinc-900">Low</option>
                 </select>
             </div>
 
