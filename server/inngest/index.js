@@ -1,5 +1,7 @@
-import {prisma} from "../db";
+import {PrismaClient} from "@prisma/client";
 import {Inngest} from "inngest";
+
+const prisma = new PrismaClient();
 
 // Create a client to send and receive events
 export const inngest = new Inngest({id: "project-management-lenis"});
