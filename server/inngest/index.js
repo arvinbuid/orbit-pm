@@ -1,4 +1,4 @@
-import {PrismaClient as prisma} from "./src/generated/prisma";
+import {PrismaClient as prisma} from "@prisma/client";
 import {Inngest} from "inngest";
 
 // Create a client to send and receive events
