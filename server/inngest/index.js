@@ -1,4 +1,4 @@
-import {prisma} from "../src/generated/prisma";
+import {PrismaClient as prisma} from "@prisma/client";
 import {Inngest} from "inngest";
 
 // Create a client to send and receive events
@@ -9,7 +9,7 @@ const syncUserCreation = inngest.createFunction(
   {event: "clerk/user.created"},
   async ({event}) => {
     const {data} = event;
-    await PrismaClient.user.create({
+    await prisma.user.create({
       data: {
         id: data.id,
         email: data?.email_addresses[0]?.email_address,
