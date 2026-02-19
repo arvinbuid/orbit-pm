@@ -20,5 +20,8 @@ node_modules
 *.sln
 *.sw?
 
+src
+
 # Environment Variables
 .env
+/generated/prisma
