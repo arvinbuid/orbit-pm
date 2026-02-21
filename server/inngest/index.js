@@ -80,6 +80,25 @@ const syncWorkspaceCreation = inngest.createFunction(
   },
 );
 
+const syncWorkspaceUpdation = inngest.createFunction(
+  {id: "update-workspace-from-clerk"},
+  {event: "clerk/organization.updated"},
+  async ({event}) => {
+    const {data} = event;
+    await prisma.workspace.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        name: data.name,
+        slug: data.slug,
+        description: data?.description,
+        image_url: data.image_url,
+      },
+    });
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
   syncUserCreation,
