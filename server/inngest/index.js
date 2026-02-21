@@ -4,6 +4,7 @@ import prisma from "../configs/prisma.js";
 // Create a client to send and receive events
 export const inngest = new Inngest({id: "project-management-lenis"});
 
+// Inngest functions for Users
 const syncUserCreation = inngest.createFunction(
   {id: "sync-user-from-clerk"},
   {event: "clerk/user.created"},
@@ -51,5 +52,39 @@ const syncUserUpdation = inngest.createFunction(
   },
 );
 
+// Inngest functions for Workspaces
+const syncWorkspaceCreation = inngest.createFunction(
+  {id: "sync-workspace-from-clerk"},
+  {event: "clerk/organization.created"},
+  async ({event}) => {
+    const {data} = event;
+    await prisma.workspace.create({
+      data: {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data?.description,
+        ownerId: data.created_by,
+        image_url: data.image_url,
+      },
+    });
+
+    // Add creator as admin member
+    await prisma.workspaceMember.create({
+      data: {
+        userId: data.created_by,
+        workspaceId: data.id,
+        role: "ADMIN",
+      },
+    });
+  },
+);
+
 // Create an empty array where we'll export future Inngest functions
-export const functions = [syncUserCreation, syncUserDeletion, syncUserUpdation];
+export const functions = [
+  syncUserCreation,
+  syncUserDeletion,
+  syncUserUpdation,
+  syncWorkspaceCreation,
+  syncWorkspaceUpdation,
+];
