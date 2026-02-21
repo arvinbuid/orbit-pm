@@ -4,6 +4,7 @@ import cors from "cors";
 import {clerkMiddleware} from "@clerk/express";
 import {serve} from "inngest/express";
 import {inngest, functions} from "./inngest/index.js";
+import workspaceRouter from "./router/workspaceRoute.js";
 
 const app = express();
 
@@ -12,10 +13,13 @@ app.use(cors());
 
 app.use(clerkMiddleware());
 
-// Set up the "/api/inngest" (recommended) routes with the serve handler
+app.get("/", (req, res) => res.send("Server is live..."));
+
+// Inngest API endpoint
 app.use("/api/inngest", serve({client: inngest, functions}));
 
-app.get("/", (req, res) => res.send("Server is live..."));
+// Routes
+app.use("/api/workspaces", workspaceRouter);
 
 const PORT = process.env.PORT || 5001;
 
