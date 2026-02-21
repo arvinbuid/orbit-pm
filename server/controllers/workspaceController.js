@@ -3,7 +3,7 @@ import prisma from "../configs/prisma.js";
 // Get all user workspaces
 export const getUserWorkspaces = async (req, res) => {
   try {
-    const {userId} = await req.auth();
+    const {userId} = req;
 
     if (!userId) {
       return res.status(401).json({message: "Unauthorized. No valid session."});
