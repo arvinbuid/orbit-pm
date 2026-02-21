@@ -1,10 +1,17 @@
+import prisma from "../configs/prisma.js";
+
 // Get all user workspaces
 export const getUserWorkspaces = async (req, res) => {
   try {
     const {userId} = await req.auth();
-    const workspaces = await prisma.workspaces.findMany({
+
+    if (!userId) {
+      return res.status(401).json({message: "Unauthorized. No valid session."});
+    }
+
+    const workspaces = await prisma.workspace.findMany({
       where: {
-        members: {some: {userId: userId}},
+        members: {some: {userId}},
       },
       include: {
         members: {include: {user: true}},
