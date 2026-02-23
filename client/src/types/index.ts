@@ -49,3 +49,33 @@ export type Project = {
     };
   }[];
 };
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  image: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Member = {
+  id: string;
+  userId: string;
+  workspaceId: string;
+  message: string;
+  role: "ADMIN" | "MEMBER";
+};
+
+export type Workspace = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  setting: object;
+  ownerId: string;
+  image_url: string;
+  projects: Project[];
+  members: Member[];
+  owner: User;
+};

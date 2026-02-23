@@ -1,5 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {AxiosError} from "axios";
+import type {Workspace} from "../types/index";
 import api from "../configs/api";
 
 export const fetchWorkspaces = createAsyncThunk(
@@ -21,7 +22,13 @@ export const fetchWorkspaces = createAsyncThunk(
   },
 );
 
-const initialState = {
+type InitialState = {
+  workspaces: Workspace[];
+  currentWorkspace: Workspace | null;
+  loading: boolean;
+};
+
+const initialState: InitialState = {
   workspaces: [],
   currentWorkspace: null,
   loading: false,
@@ -36,7 +43,7 @@ const workspaceSlice = createSlice({
     },
     setCurrentWorkspace: (state, action) => {
       localStorage.setItem("currentWorkspaceId", action.payload);
-      state.currentWorkspace = state.workspaces.find((w) => w.id === action.payload);
+      state.currentWorkspace = state.workspaces.find((w) => w.id === action.payload) ?? null;
     },
     addWorkspace: (state, action) => {
       state.workspaces.push(action.payload);
@@ -60,16 +67,17 @@ const workspaceSlice = createSlice({
       state.workspaces = state.workspaces.filter((w) => w.id !== action.payload);
     },
     addProject: (state, action) => {
-      state.currentWorkspace.projects.push(action.payload);
+      state.currentWorkspace?.projects.push(action.payload);
       // find workspace by id and add project to it
       state.workspaces = state.workspaces.map((w) =>
-        w.id === state.currentWorkspace.id
+        w.id === state.currentWorkspace?.id
           ? {...w, projects: w.projects.concat(action.payload)}
           : w,
       );
     },
     addTask: (state, action) => {
-      state.currentWorkspace.projects = state.currentWorkspace.projects.map((p) => {
+      if (!state.currentWorkspace) return;
+      state.currentWorkspace.projects = state.currentWorkspace?.projects.map((p) => {
         console.log(p.id, action.payload.projectId, p.id === action.payload.projectId);
         if (p.id === action.payload.projectId) {
           p.tasks.push(action.payload);
@@ -79,7 +87,7 @@ const workspaceSlice = createSlice({
 
       // find workspace and project by id and add task to it
       state.workspaces = state.workspaces.map((w) =>
-        w.id === state.currentWorkspace.id
+        w.id === state.currentWorkspace?.id
           ? {
               ...w,
               projects: w.projects.map((p) =>
@@ -92,14 +100,14 @@ const workspaceSlice = createSlice({
       );
     },
     updateTask: (state, action) => {
-      state.currentWorkspace.projects.map((p) => {
+      state.currentWorkspace?.projects.map((p) => {
         if (p.id === action.payload.projectId) {
           p.tasks = p.tasks.map((t) => (t.id === action.payload.id ? action.payload : t));
         }
       });
       // find workspace and project by id and update task in it
       state.workspaces = state.workspaces.map((w) =>
-        w.id === state.currentWorkspace.id
+        w.id === state.currentWorkspace?.id
           ? {
               ...w,
               projects: w.projects.map((p) =>
@@ -115,13 +123,13 @@ const workspaceSlice = createSlice({
       );
     },
     deleteTask: (state, action) => {
-      state.currentWorkspace.projects.map((p) => {
+      state.currentWorkspace?.projects.map((p) => {
         p.tasks = p.tasks.filter((t) => !action.payload.includes(t.id));
         return p;
       });
       // find workspace and project by id and delete task from it
       state.workspaces = state.workspaces.map((w) =>
-        w.id === state.currentWorkspace.id
+        w.id === state.currentWorkspace?.id
           ? {
               ...w,
               projects: w.projects.map((p) =>
@@ -147,7 +155,9 @@ const workspaceSlice = createSlice({
       if (action.payload.length > 0) {
         const localStorageCurrentWorkspaceId = localStorage.getItem("currentWorkspaceId");
         if (localStorageCurrentWorkspaceId) {
-          const findWorkspace = action.payload.find((w) => w.id === localStorageCurrentWorkspaceId);
+          const findWorkspace = action.payload.find(
+            (w: Workspace) => w.id === localStorageCurrentWorkspaceId,
+          );
 
           if (findWorkspace) {
             state.currentWorkspace = findWorkspace;
