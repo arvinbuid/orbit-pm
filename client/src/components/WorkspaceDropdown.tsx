@@ -50,7 +50,7 @@ function WorkspaceDropdown() {
                 className="w-full flex items-center justify-between p-3 h-auto text-left rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
             >
                 <div className="flex items-center gap-3">
-                    <img src={currentWorkspace?.image_url} alt={currentWorkspace?.name} className="w-8 h-8 rounded shadow" />
+                    <img src={currentWorkspace?.image_url} alt={currentWorkspace?.name} className="w-8 h-8 rounded shadow object-cover" />
                     <div className="min-w-0 flex-1">
                         <p className="font-semibold text-gray-800 dark:text-white text-sm truncate">
                             {currentWorkspace?.name || "Select Workspace"}
@@ -75,7 +75,7 @@ function WorkspaceDropdown() {
                                     key={organization.id}
                                     onClick={() => onSelectWorkspace(organization.id)} className="flex items-center gap-3 p-2 cursor-pointer rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
                                 >
-                                    <img src={organization.imageUrl} alt={organization.name} className="w-6 h-6 rounded" />
+                                    <img src={organization.imageUrl} alt={organization.name} className="w-6 h-6 rounded object-cover" />
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
                                             {organization.name}
