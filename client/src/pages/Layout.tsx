@@ -5,18 +5,27 @@ import { Outlet } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar';
-import { SignIn, useUser, } from '@clerk/clerk-react';
+import { CreateOrganization, SignIn, useAuth, useUser, } from '@clerk/clerk-react';
+import { fetchWorkspaces } from '../features/workspaceSlice';
 
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const { loading } = useAppSelector(state => state.workspace)
+    const { loading, workspaces } = useAppSelector(state => state.workspace)
     const dispatch = useAppDispatch();
-    const { user } = useUser()
+    const { user, isLoaded } = useUser()
+    const { getToken } = useAuth()
 
     // Initial load of theme
     useEffect(() => {
         dispatch(loadTheme())
     }, [dispatch])
+
+    // Initial load of workspaces
+    useEffect(() => {
+        if (!user && !isLoaded) return;
+        if (workspaces.length > 0) return;
+        dispatch(fetchWorkspaces({ getToken }))
+    }, [user, isLoaded])
 
     if (!user) {
         return (
@@ -30,6 +39,14 @@ const Layout = () => {
         return (
             <div className='flex items-center justify-center h-screen bg-white dark:bg-zinc-950'>
                 <Loader2Icon className="size-7 text-blue-500 animate-spin" />
+            </div>
+        )
+    }
+
+    if (user && workspaces.length === 0) {
+        return (
+            <div className='min-h-screen flex justify-center items-center'>
+                <CreateOrganization />
             </div>
         )
     }

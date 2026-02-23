@@ -1,5 +1,4 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {dummyWorkspaces} from "../assets/assets";
 import api from "../configs/api";
 
 export const fetchWorkspaces = createAsyncThunk(
@@ -20,8 +19,8 @@ export const fetchWorkspaces = createAsyncThunk(
 );
 
 const initialState = {
-  workspaces: dummyWorkspaces || [],
-  currentWorkspace: dummyWorkspaces[1],
+  workspaces: [],
+  currentWorkspace: null,
   loading: false,
 };
 
