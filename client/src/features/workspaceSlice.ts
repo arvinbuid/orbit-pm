@@ -1,4 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {AxiosError} from "axios";
 import api from "../configs/api";
 
 export const fetchWorkspaces = createAsyncThunk(
@@ -11,8 +12,10 @@ export const fetchWorkspaces = createAsyncThunk(
         },
       });
       return data.workspaces || [];
-    } catch (error: unknown) {
-      console.error(error.response.data.message || error.message);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        console.error(err.response?.data.message || err.message);
+      }
       return [];
     }
   },
