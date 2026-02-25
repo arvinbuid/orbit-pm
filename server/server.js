@@ -9,6 +9,7 @@ import {protect} from "./middlewares/authMiddleware.js";
 import workspaceRouter from "./router/workspaceRoute.js";
 import projectRouter from "./router/projectRoutes.js";
 import taskRouter from "./router/taskRoutes.js";
+import commentRouter from "./router/commentRoutes.js";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/api/inngest", serve({client: inngest, functions}));
 app.use("/api/workspaces", protect, workspaceRouter);
 app.use("/api/projects", protect, projectRouter);
 app.use("/api/tasks", protect, taskRouter);
+app.use("/api/comments", protect, commentRouter);
 
 const PORT = process.env.PORT || 5001;
 
