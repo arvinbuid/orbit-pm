@@ -43,7 +43,7 @@ export const createTask = async (req, res) => {
     res.json({task: taskWithAssignee, message: "Task created successfully."});
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: error.code | error.message});
+    res.status(500).json({message: error.code || error.message});
   }
 };
 
@@ -80,6 +80,6 @@ export const updateTask = async (req, res) => {
     res.json({task: updateTask, message: "Task updated successfully."});
   } catch (error) {
     console.error(error);
-    res.status(500).json({message: error.code | error.message});
+    res.status(500).json({message: error.code || error.message});
   }
 };
