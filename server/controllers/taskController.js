@@ -46,3 +46,40 @@ export const createTask = async (req, res) => {
     res.status(500).json({message: error.code | error.message});
   }
 };
+
+// Update task
+export const updateTask = async (req, res) => {
+  try {
+    const {userId} = req;
+    const task = await prisma.task.findUnique({
+      where: {id: req.params.id},
+    });
+
+    if (!task) {
+      return res.status(404).json({message: "Task not found."});
+    }
+
+    // Check if user have admin role for project
+    const project = await prisma.project.findUnique({
+      where: {id: task.projectId},
+      include: {members: {include: {user: true}}},
+    });
+
+    if (!project) {
+      return res.status(404).json({message: "Project not found."});
+    } else if (project.team_lead !== userId) {
+      return res.status(403).json({message: "You do not have admin privileges for this project."});
+    }
+
+    // Update task
+    const updateTask = await prisma.task.update({
+      where: {id: req.params.id},
+      data: req.body,
+    });
+
+    res.json({task: updateTask, message: "Task updated successfully."});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({message: error.code | error.message});
+  }
+};
