@@ -81,3 +81,38 @@ export const updateTask = async (req, res) => {
     res.status(500).json({message: error.code || error.message});
   }
 };
+
+export const deleteTask = async (req, res) => {
+  try {
+    const {userId} = req;
+    const {taskIds} = req.body;
+    const tasks = await prisma.task.findMany({
+      where: {id: {in: taskIds}},
+    });
+
+    if (tasks.length === 0) {
+      return res.status(404).json({message: "Task not found."});
+    }
+
+    const project = await prisma.project.findUnique({
+      where: {id: tasks[0].projectId},
+      include: {members: {include: {user: true}}},
+    });
+
+    // prettier-ignore
+    if (!project) {
+      return res.status(404).json({message: "Project not found."});
+    } else if (project.team_lead !== userId) {
+      return res.status(403).json({message: "You do not have permission to create tasks for this project."});
+    }
+
+    await prisma.task.deleteMany({
+      where: {id: {in: taskIds}},
+    });
+
+    res.json({message: "Task deleted successfully."});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({message: error.code || error.message});
+  }
+};
