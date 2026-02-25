@@ -13,10 +13,11 @@ export const createTask = async (req, res) => {
       include: {members: {include: {user: true}}},
     });
 
+    // prettier-ignore
     if (!project) {
       return res.status(404).json({message: "Project not found."});
     } else if (project.team_lead !== userId) {
-      return res.status(403).json({message: "You do not have admin privileges for this project."});
+      return res.status(403).json({message: "You do not have permission to create tasks for this project."});
     } else if (assigneeId && !project.members.find((member) => member.userId === assigneeId)) {
       return res.status(403).json({message: "Assignee is not a member of this project/workspace."});
     }
@@ -33,14 +34,10 @@ export const createTask = async (req, res) => {
         assigneeId,
         due_date: new Date(due_date),
       },
-    });
-
-    const taskWithAssignee = await prisma.task.findUnique({
-      where: {id: task.id},
       include: {assignee: true},
     });
 
-    res.json({task: taskWithAssignee, message: "Task created successfully."});
+    res.json({task, message: "Task created successfully."});
   } catch (error) {
     console.error(error);
     res.status(500).json({message: error.code || error.message});
@@ -65,19 +62,20 @@ export const updateTask = async (req, res) => {
       include: {members: {include: {user: true}}},
     });
 
+    // prettier-ignore
     if (!project) {
       return res.status(404).json({message: "Project not found."});
     } else if (project.team_lead !== userId) {
-      return res.status(403).json({message: "You do not have admin privileges for this project."});
+      return res.status(403).json({message: "You do not have permission to create tasks for this project."});
     }
 
     // Update task
-    const updateTask = await prisma.task.update({
+    const updatedTask = await prisma.task.update({
       where: {id: req.params.id},
       data: req.body,
     });
 
-    res.json({task: updateTask, message: "Task updated successfully."});
+    res.json({task: updatedTask, message: "Task updated successfully."});
   } catch (error) {
     console.error(error);
     res.status(500).json({message: error.code || error.message});
