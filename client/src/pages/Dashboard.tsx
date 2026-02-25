@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
 import StatsGrid from "../components/StatsGrid";
 import ProjectOverview from "../components/ProjectOverview";
 import CreateNewProjectForm from "../components/CreateNewProjectForm";
@@ -7,7 +8,7 @@ import RecentActivity from "../components/RecentActivity";
 import TaskSummary from "../components/TaskSummary";
 
 const Dashboard = () => {
-    const user = { fullName: 'Daryl Dixon' } // HARDCODED FOR NOW!
+    const { user } = useUser();
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     return (
