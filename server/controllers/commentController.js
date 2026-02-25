@@ -38,3 +38,18 @@ export const createComment = async (req, res) => {
     res.status(500).json({message: error.code || error.message});
   }
 };
+
+// Get comments for task
+export const getTaskComments = async (req, res) => {
+  try {
+    const {taskId} = req.params;
+    const comments = await prisma.comment.findMany({
+      where: {taskId},
+      include: {user: true},
+    });
+    res.json({comments});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({message: error.code || error.message});
+  }
+};
