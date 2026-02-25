@@ -1,4 +1,5 @@
 import prisma from "../configs/prisma.js";
+import {inngest} from "../inngest/index.js";
 
 // Create task
 export const createTask = async (req, res) => {
@@ -35,6 +36,12 @@ export const createTask = async (req, res) => {
         due_date: new Date(due_date),
       },
       include: {assignee: true},
+    });
+
+    // Trigger send email inngest event
+    await inngest.send({
+      name: "app/task.assigned",
+      data: {taskId: task.id, origin},
     });
 
     res.json({task, message: "Task created successfully."});
