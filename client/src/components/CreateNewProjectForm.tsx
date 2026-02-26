@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { XIcon } from "lucide-react";
-import { useAppSelector } from "../app/hooks";
+import { useAuth } from "@clerk/clerk-react";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { addProject } from "../features/workspaceSlice";
+import toast from "react-hot-toast";
+import api from "../configs/api";
 
 interface CreateNewProjectFormProps {
     isDialogOpen: boolean;
@@ -20,8 +24,10 @@ type FormData = {
 };
 
 const CreateNewProjectForm = ({ isDialogOpen, setIsDialogOpen }: CreateNewProjectFormProps) => {
-    const currentWorkspace = useAppSelector((state) => state.workspace.currentWorkspace);
+    const { currentWorkspace } = useAppSelector((state) => state.workspace);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { getToken } = useAuth()
+    const dispatch = useAppDispatch();
 
     const [formData, setFormData] = useState<FormData>({
         name: "",
@@ -37,6 +43,22 @@ const CreateNewProjectForm = ({ isDialogOpen, setIsDialogOpen }: CreateNewProjec
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
+        try {
+            if (!formData.team_lead) return toast.error("Please select a team lead.");
+            setIsSubmitting(true)
+            const { data } = await api.post(
+                '/api/projects',
+                { workspaceId: currentWorkspace?.id, ...formData },
+                { headers: { Authorization: `Bearer ${await getToken()}` } }
+            )
+            dispatch(addProject(data.project));
+            setIsSubmitting(false);
+            setIsDialogOpen(false);
+        } catch (error) {
+            toast.error(error.response.data?.message || error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const removeTeamMember = (email: string) => {
@@ -141,7 +163,7 @@ const CreateNewProjectForm = ({ isDialogOpen, setIsDialogOpen }: CreateNewProjec
                             className="w-full px-3 py-2 rounded dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 mt-1 text-zinc-900 dark:text-zinc-200 text-sm"
                         >
                             <option value="">No lead</option>
-                            {currentWorkspace.members.map((member) => (
+                            {currentWorkspace?.members.map((member) => (
                                 <option key={member.user.email} value={member.user.email}>
                                     {member.user.email}
                                 </option>
@@ -161,7 +183,7 @@ const CreateNewProjectForm = ({ isDialogOpen, setIsDialogOpen }: CreateNewProjec
                             }}
                         >
                             <option value="">Add team members</option>
-                            {currentWorkspace.members
+                            {currentWorkspace?.members
                                 .filter((member) => !formData.team_members.includes(member.user.email))
                                 .map((member) => (
                                     <option key={member.user.email} value={member.user.email}>
