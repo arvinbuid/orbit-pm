@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { addProject } from "../features/workspaceSlice";
 import toast from "react-hot-toast";
 import api from "../configs/api";
+import axios from "axios";
 
 interface CreateNewProjectFormProps {
     isDialogOpen: boolean;
@@ -55,7 +56,11 @@ const CreateNewProjectForm = ({ isDialogOpen, setIsDialogOpen }: CreateNewProjec
             setIsSubmitting(false);
             setIsDialogOpen(false);
         } catch (error) {
-            toast.error(error.response.data?.message || error.message);
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
         } finally {
             setIsSubmitting(false);
         }
