@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { useAppSelector } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
+import { addTask } from "../features/workspaceSlice";
+import axios from "axios";
+import toast from "react-hot-toast";
+import api from "../configs/api";
 
 interface CreateTaskDialogProps {
     showCreateTask: boolean
@@ -11,8 +16,10 @@ interface CreateTaskDialogProps {
 
 const CreateTaskDialog = ({ showCreateTask, setShowCreateTask, projectId }: CreateTaskDialogProps) => {
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
-    const project = currentWorkspace.projects.find((p) => p.id === projectId);
-    const teamMembers = project?.members || []
+    const project = currentWorkspace?.projects.find((p) => p.id === projectId);
+    const teamMembers = project?.members || [];
+    const { getToken } = useAuth();
+    const dispatch = useAppDispatch();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
@@ -25,7 +32,40 @@ const CreateTaskDialog = ({ showCreateTask, setShowCreateTask, projectId }: Crea
         due_date: "",
     });
 
-    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => e.preventDefault()
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            setIsSubmitting(true)
+            const token = await getToken();
+            const { data } = await api.post('/api/tasks', { projectId, ...formData }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            toast.success(data.message);
+            dispatch(addTask(data.task))
+            setIsSubmitting(false);
+            setShowCreateTask(false);
+            setFormData({
+                title: "",
+                description: "",
+                type: "TASK",
+                status: "TODO",
+                priority: "MEDIUM",
+                assigneeId: "",
+                due_date: "",
+            })
+        } catch (error) {
+            setIsSubmitting(false);
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
 
     return showCreateTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 dark:bg-black/60 backdrop-blur">
