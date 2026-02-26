@@ -2,7 +2,13 @@ import { format } from "date-fns";
 import { Plus, Save } from "lucide-react";
 import { useState } from "react";
 import type { Project } from "../types";
+import { useAuth } from "@clerk/clerk-react";
+import { useAppDispatch } from "../app/hooks";
+import { fetchWorkspaces } from "../features/workspaceSlice";
 import AddProjectMember from "./AddProjectMember";
+import axios from "axios";
+import toast from "react-hot-toast";
+import api from "../configs/api";
 
 interface ProjectSettingsProps {
     project: Project;
@@ -11,6 +17,8 @@ interface ProjectSettingsProps {
 const ProjectSettings = ({ project }: ProjectSettingsProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { getToken } = useAuth();
+    const dispatch = useAppDispatch();
     const [formData, setFormData] = useState(project || {
         name: "Brand New Website Launch",
         description: "Initial launch for new web platform.",
@@ -21,8 +29,30 @@ const ProjectSettings = ({ project }: ProjectSettingsProps) => {
         progress: 30,
     })
 
+
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const token = await getToken();
+        try {
+            setIsSubmitting(true);
+            const { data } = await api.put('/api/projects', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            toast.success(data.message);
+            setIsSubmitting(false);
+            dispatch(fetchWorkspaces({ getToken }))
+
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const inputClasses = "w-full px-3 py-2 rounded mt-2 border text-sm dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-300";
