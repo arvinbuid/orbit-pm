@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
 import { useAppSelector } from "../app/hooks";
 import { useOrganization } from "@clerk/clerk-react";
-import type { OrganizationCustomRoleKey } from '@clerk/types'
 import toast from "react-hot-toast";
 import axios from "axios";
 
@@ -24,7 +23,7 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }: InviteMemberDialo
         const email = formData.email.trim();
 
         try {
-            await organization?.inviteMember({ emailAddress: email, role: formData.role as OrganizationCustomRoleKey });
+            await organization?.inviteMember({ emailAddress: email, role: formData.role });
             toast.success("Invitation sent successfully.");
             setIsDialogOpen(false);
         } catch (error) {
