@@ -7,7 +7,7 @@ export const buildEmailBody = (task, origin, isReminder = false) => `
 
       <div style="border: 1px solid #ddd; padding: 12px 16px; border-radius: 6px; margin-bottom: 30px;">
         <p style="margin: 6px 0;"><strong>Description:</strong> ${task.description}</p>
-        <p style="margin: 6px 0;"><strong>Due Date:</strong> ${new Date(task.due_date.toLocaleDateString())}</p>
+        <p style="margin: 6px 0;"><strong>Due Date:</strong> ${task.due_date.toLocaleDateString()}</p>
       </div>
 
       <a href="${origin}" style="background-color: #007bff; padding: 12px 24px; border-radius: 5px; color: #fff; font-weight: 600; font-size: 16px; text-decoration: none;"

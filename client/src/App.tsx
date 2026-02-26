@@ -5,10 +5,12 @@ import Team from "./pages/Team";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import TaskDetails from "./pages/TaskDetails";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <>
+      <Toaster />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />

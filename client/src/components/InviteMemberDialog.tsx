@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
 import { useAppSelector } from "../app/hooks";
+import { useOrganization } from "@clerk/clerk-react";
+import type { OrganizationCustomRoleKey } from '@clerk/types'
+import toast from "react-hot-toast";
+import axios from "axios";
 
 interface InviteMemberDialogProps {
     isDialogOpen: boolean;
@@ -11,10 +15,27 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }: InviteMemberDialo
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({ email: "", role: "org:member", });
+    const { organization } = useOrganization();
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsSubmitting(true)
 
+        const email = formData.email.trim();
+
+        try {
+            await organization?.inviteMember({ emailAddress: email, role: formData.role as OrganizationCustomRoleKey });
+            toast.success("Invitation sent successfully.");
+            setIsDialogOpen(false);
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (!isDialogOpen) return null;
@@ -45,6 +66,8 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }: InviteMemberDialo
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 w-4 h-4" />
                             <input
                                 type="email"
+                                id="email"
+                                name="email"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="Enter email address"
                                 className="pl-10 mt-1 w-full rounded border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 text-sm placeholder-zinc-400 dark:placeholder-zinc-500 py-2 focus:outline-none focus:border-blue-500"
@@ -58,6 +81,8 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }: InviteMemberDialo
                         <label className="text-sm font-medium text-zinc-900 dark:text-zinc-200">Role</label>
                         <select
                             value={formData.role}
+                            name="role"
+                            id="role"
                             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                             className="w-full rounded border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 py-2 px-3 mt-1 focus:outline-none focus:border-blue-500 text-sm"
                         >

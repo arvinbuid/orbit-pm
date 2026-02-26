@@ -137,46 +137,42 @@ const sendTaskAssignmentEmail = inngest.createFunction(
   async ({event, step}) => {
     const {taskId, origin} = event.data;
 
-    const task = await step.run("fetch-task", async () => {
-      return await prisma.task.findUnique({
-        where: {id: taskId},
-        include: {assignee: true, project: true},
-      });
+    const task = await prisma.task.findUnique({
+      where: {id: taskId},
+      include: {assignee: true, project: true},
     });
 
     if (!task) return;
 
     // Send email
-    await step.run("send-assignment-mail", async () => {
-      sendEmail({
-        to: task.assignee.email,
-        subject: `New Task Assignment in ${task.project.name}`,
-        body: buildEmailBody(task, origin),
-      });
+    await sendEmail({
+      to: task.assignee.email,
+      subject: `New Task Assignment in ${task.project.name}`,
+      body: buildEmailBody(task, origin),
     });
 
     // Check if current date is not the same as the due date
-    if (new Date(task.due_date).toLocaleDateString() !== new Date().toDateString()) {
+    if (new Date(task.due_date).toDateString() !== new Date().toDateString()) {
       await step.sleepUntil("wait-for-due-date", new Date(task.due_date));
 
-      const latestTask = await step.run("check-if-task-is-completed", async () => {
-        return await prisma.task.findUnique({
+      await step.run("check-if-task-is-completed", async () => {
+        const task = await prisma.task.findUnique({
           where: {id: taskId},
           include: {assignee: true, project: true},
         });
-      });
 
-      if (!latestTask) return;
+        if (!task) return;
 
-      if (latestTask && task.status !== "DONE") {
-        await step.run("send-task-reminder-mail", async () => {
-          await sendEmail({
-            to: task.assignee.email,
-            subject: `Reminder for ${task.project.name}`,
-            body: buildEmailBody(task, origin, true),
+        if (!task !== "DONE") {
+          await step.run("send-task-reminder-mail", async () => {
+            await sendEmail({
+              to: task.assignee.email,
+              subject: `Reminder for ${task.project.name}`,
+              body: buildEmailBody(task, origin, true),
+            });
           });
-        });
-      }
+        }
+      });
     }
   },
 );
