@@ -23,7 +23,6 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
     "recharts": "^3.7.0",
-    "svix": "^1.86.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
