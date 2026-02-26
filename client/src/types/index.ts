@@ -64,6 +64,7 @@ export type Member = {
   userId: string;
   workspaceId: string;
   message: string;
+  user: User;
   role: "ADMIN" | "MEMBER";
 };
 
