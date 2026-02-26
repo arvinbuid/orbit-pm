@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
-import { useAppSelector } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useSearchParams } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import { fetchWorkspaces } from "../features/workspaceSlice";
+import axios from "axios";
+import toast from "react-hot-toast";
+import api from "../configs/api";
 
 interface AddProjectMemberProps {
     isDialogOpen: boolean;
@@ -13,12 +18,38 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }: AddProjectMemberPro
     const [isAdding, setIsAdding] = useState(false);
     const [searchParams] = useSearchParams();
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
+    const { getToken } = useAuth();
+    const dispatch = useAppDispatch();
 
     const id = searchParams.get('id')
-    const project = currentWorkspace.projects.find((p) => p.id === id);
+    const project = currentWorkspace?.projects.find((p) => p.id === id);
     const projectMembersEmails = project?.members.map((member) => member.user.email)
 
-    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => e.preventDefault();
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            setIsAdding(true);
+            const token = await getToken();
+            const { data } = await api.post(`/api/projects/${project?.id}/addMember`, { email }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            toast.success(data.message);
+            dispatch(fetchWorkspaces({ getToken }));
+            setIsAdding(false);
+            setIsDialogOpen(false);
+        } catch (error) {
+            setIsAdding(false);
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
+        } finally {
+            setIsAdding(false);
+        }
+    };
 
     if (!isDialogOpen) return null;
 
@@ -60,8 +91,8 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }: AddProjectMemberPro
                                 required
                             >
                                 <option value="">Select a member</option>
-                                {currentWorkspace.members
-                                    .filter((member) => projectMembersEmails?.includes(member.user.email))
+                                {currentWorkspace?.members
+                                    .filter((member) => !projectMembersEmails?.includes(member.user.email))
                                     .map((member) => (
                                         <option key={member.user.id} value={member.user.email}>
                                             {member.user.email}
