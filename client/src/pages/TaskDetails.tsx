@@ -1,10 +1,12 @@
 import { format } from "date-fns";
-import toast from "react-hot-toast";
 import { useAppSelector } from "../app/hooks";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CalendarIcon, MessageCircle, PenIcon } from "lucide-react";
-import { assets } from "../assets/assets";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
+import axios from "axios";
+import api from "../configs/api";
 
 type Comment = {
     id: string;
@@ -18,50 +20,68 @@ const TaskDetails = () => {
     const projectId = searchParams.get("projectId");
     const taskId = searchParams.get("taskId");
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
+    const { getToken } = useAuth();
+    const { user } = useUser();
 
-    const user = { id: 'Daryl Dixon' }
-    const project = currentWorkspace.projects.find((p) => p.id === projectId)
+    const project = currentWorkspace?.projects.find((p) => p.id === projectId)
     const task = project?.tasks.find((t) => t.id === taskId)
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
 
+    // Fetch comments when component mounts
+    useEffect(() => {
+        const fetchComments = async () => {
+            if (!taskId) return;
+            const token = await getToken();
 
-    const fetchComments = () => { }
+            try {
+                const { data } = await api.get(`api/comments/${taskId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                })
+                setComments(data.comments || []);
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    toast.error(error.response?.data?.message || error.message);
+                } else {
+                    toast.error("An unexpected error occurred");
+                }
+            }
+
+        }
+
+        fetchComments();
+        const interval = setInterval(() => { fetchComments(); }, 10000);
+        return () => clearInterval(interval);
+
+    }, [taskId, task, getToken]);
 
     const handleAddComment = async () => {
         if (!newComment.trim()) return;
 
         try {
             toast.loading("Adding comment...");
+            const token = await getToken();
+            const { data } = await api.post('/api/comments', { taskId, content: newComment }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
 
-            //  Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-
-            const dummyComment: Comment = {
-                id: Date.now().toString(),
-                user: { id: "1", name: "Rick Grimes", image: assets.profile_img_a },
-                content: newComment,
-                createdAt: new Date().toISOString()
-            };
-
-            setComments((prev) => [...prev, dummyComment]);
+            setComments((prev) => [...prev, data.comment]);
             setNewComment("");
             toast.dismissAll();
             toast.success("Comment added.");
         } catch (error) {
             toast.dismissAll();
-            toast.error(error.response.data.message || error.message);
-            console.error(error);
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
         }
     };
-
-    useEffect(() => {
-        if (taskId && task) {
-            fetchComments();
-            const interval = setInterval(() => { fetchComments(); }, 10000);
-            return () => clearInterval(interval);
-        }
-    }, [taskId, task]);
 
     if (!task) return <div className="text-red-500 px-4 py-6">Task not found.</div>;
 
@@ -80,7 +100,7 @@ const TaskDetails = () => {
                                 {comments.map((comment) => (
                                     <div
                                         key={comment.id}
-                                        className={`sm:max-w-4/5 dark:bg-linear-to-br dark:from-zinc-800 dark:to-zinc-900 border border-gray-300 dark:border-zinc-700 p-3 rounded-md ${comment.user.id === user.id ? "ml-auto" : "mr-auto"}`}
+                                        className={`sm:max-w-4/5 dark:bg-linear-to-br dark:from-zinc-800 dark:to-zinc-900 border border-gray-300 dark:border-zinc-700 p-3 rounded-md ${comment.user.id === user?.id ? "ml-auto" : "mr-auto"}`}
                                     >
                                         <div className="flex items-center gap-2 mb-1 text-sm text-gray-500 dark:text-zinc-400">
                                             <img src={comment.user.image} alt="avatar" className="size-5 rounded-full" />
