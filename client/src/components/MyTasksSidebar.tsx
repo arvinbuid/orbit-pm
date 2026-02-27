@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CheckSquareIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '../app/hooks';
+import { useUser } from '@clerk/clerk-react';
 
 type Task = {
     id: string;
@@ -28,7 +29,7 @@ type Task = {
 
 
 function MyTasksSidebar() {
-    const user = { id: 'user_1' } // HARDCODED FOR NOW
+    const { user } = useUser();
     const [showMyTasks, setShowMyTasks] = useState(false);
     const [myTasks, setMyTasks] = useState<Task[]>([]);
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
@@ -50,19 +51,19 @@ function MyTasksSidebar() {
 
     useEffect(() => {
         const fetchUserTasks = () => {
-            if (!user.id || !currentWorkspace) throw new Error('User or workspace not found!');
+            if (!user?.id || !currentWorkspace) throw new Error('User or workspace not found!');
             const currentWorkspaceTasks: Task[] = currentWorkspace.projects.flatMap((project) => {
-                return project.tasks.filter((task) => task.assignee.id === user.id);
+                return project.tasks.filter((task) => task.assignee.id === user?.id);
             });
             setMyTasks(currentWorkspaceTasks);
         };
         fetchUserTasks();
-    }, [currentWorkspace, user.id]);
+    }, [currentWorkspace, user?.id]);
 
     return (
         <div className="mt-6 px-3">
             <div onClick={toggleMyTasks} className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800" >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 select-none">
                     <CheckSquareIcon className="w-4 h-4 text-gray-500 dark:text-zinc-400" />
                     <h3 className="text-sm font-medium text-gray-700 dark:text-zinc-300">My Tasks</h3>
                     <span className="bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 text-xs px-2 py-0.5 rounded">
@@ -87,10 +88,11 @@ function MyTasksSidebar() {
                             myTasks.map((task) => (
                                 <Link key={task.id}
                                     to={`/taskDetails?projectId=${task.projectId}&taskId=${task.id}`}
-                                    className="w-full rounded-lg transition-all duration-200 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-black dark:hover:text-white" >
+                                    className="w-full rounded-lg transition-all duration-200 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-black dark:hover:text-white"
+                                >
                                     <div className="flex items-center gap-2 px-3 py-2 w-full min-w-0">
                                         <div className={`w-2 h-2 rounded-full ${getTaskStatusColor(task.status)} shrink-0`} />
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex-1 min-w-0 select-none">
                                             <p className="text-xs font-medium truncate">
                                                 {task.title}
                                             </p>
