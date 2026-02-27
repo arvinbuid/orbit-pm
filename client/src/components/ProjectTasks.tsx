@@ -181,7 +181,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
                     <button
                         type="button"
                         onClick={handleDelete}
-                        className="px-3 py-1 flex items-center gap-2 rounded bg-linear-to-br from-indigo-400 to-indigo-500 text-zinc-100 dark:text-zinc-200 text-sm transition-colors"
+                        className="px-3 py-1 flex items-center gap-2 rounded bg-linear-to-br from-red-500 to-red-600 text-zinc-100 dark:text-zinc-200 text-sm transition-colors"
                     >
                         <Trash className="size-3" /> Delete
                     </button>
