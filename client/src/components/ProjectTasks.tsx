@@ -5,7 +5,10 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteTask, updateTask } from "../features/workspaceSlice";
 import { Bug, CalendarIcon, GitCommit, MessageSquare, Square, Trash, XIcon, Zap } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
+import api from "../configs/api";
+import axios from "axios";
 
 const TYPEICONS = {
     BUG: { icon: Bug, color: "text-red-600 dark:text-red-400" },
@@ -36,6 +39,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
         priority: "",
         assignee: "",
     });
+    const { getToken } = useAuth();
 
     const assigneeList = useMemo(() => {
         return Array.from(new Set(tasks.map((t) => t.assignee))).filter(Boolean);
@@ -60,10 +64,14 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
 
     const handleStatusChange = async (taskId: string, newStatus: string) => {
         try {
-            toast.loading("Updating status...");
+            toast.loading("Updating task status...");
+            const token = await getToken();
 
-            //  Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await api.put(`/api/tasks/${taskId}`, { status: newStatus }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
 
             const updatedTask = structuredClone(tasks.find((t) => t.id === taskId));
             updatedTask!.status = newStatus
@@ -73,7 +81,11 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
             toast.success("Task status updated successfully");
         } catch (error) {
             toast.dismissAll();
-            toast.error(error.response.data.message || error.message); // will properly handle this soon.
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data?.message || error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
         }
     };
 
@@ -83,17 +95,23 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
             if (!confirm) return;
 
             toast.loading("Deleting tasks...");
+            const token = await getToken();
 
-            //  Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await api.post('/api/tasks/delete', { taskIds: selectedTasks }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
 
             dispatch(deleteTask(selectedTasks));
-
             toast.dismissAll();
             toast.success("Tasks deleted successfully");
         } catch (error) {
-            toast.dismissAll();
-            toast.error(error.response.data.message || error.message);
+            if (axios.isAxiosError(error)) {
+                toast.error(error.response?.data.message || error.message);
+            } else {
+                toast.error("An unexpected error occurred");
+            }
         }
     };
 
