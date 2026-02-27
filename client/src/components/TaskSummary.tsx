@@ -1,12 +1,21 @@
+import { useUser } from "@clerk/clerk-react";
 import { useAppSelector } from "../app/hooks";
 import { ArrowRight, Clock, AlertTriangle, User } from "lucide-react";
 
+const TEXTPRIORITYCOLOR = {
+    "LOW": "text-zinc-600 dark:text-zinc-400",
+    "MEDIUM": "text-amber-600 dark:text-amber-400",
+    "HIGH": "text-red-600 dark:text-red-400"
+} as const;
+
 
 const TaskSummary = () => {
-    const user = { id: 'Daryl Dixon' }
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
-    const tasks = currentWorkspace.projects.flatMap((project) => project.tasks) || [];
+    const { user } = useUser();
 
+    if (!user) return null;
+
+    const tasks = currentWorkspace?.projects.flatMap((project) => project.tasks) || [];
     const myTasks = tasks.filter(i => i.assigneeId === user.id);
     const overdueTasks = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'DONE');
     const inProgressIssues = tasks.filter(i => i.status === 'IN_PROGRESS');
@@ -58,7 +67,7 @@ const TaskSummary = () => {
                     <div className="p-4">
                         {card.items.length === 0 ? (
                             <p className="text-sm text-gray-500 dark:text-zinc-400 text-center py-4">
-                                No {card.title.toLowerCase()}
+                                No {card.title.toLowerCase()} available.
                             </p>
                         ) : (
                             <div className="space-y-3">
@@ -70,7 +79,7 @@ const TaskSummary = () => {
                                         <h4 className="text-sm font-medium text-gray-800 dark:text-white truncate">
                                             {issue.title}
                                         </h4>
-                                        <p className="text-xs text-gray-600 dark:text-zinc-400 capitalize mt-1">
+                                        <p className={`text-xs ${TEXTPRIORITYCOLOR[issue.priority as keyof typeof TEXTPRIORITYCOLOR]} capitalize mt-1`}>
                                             {issue.type} • {issue.priority} priority
                                         </p>
                                     </div>
