@@ -48,7 +48,7 @@ const StatsGrid = () => {
             icon: FolderOpen,
             title: "Total Projects",
             value: stats.totalProjects,
-            subtitle: `projects in ${currentWorkspace.name}`,
+            subtitle: `projects in ${currentWorkspace?.name}`,
             bgColor: "bg-blue-500/10",
             textColor: "text-blue-500",
         },

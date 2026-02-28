@@ -22,7 +22,7 @@ const PRIORITYCOLORS = {
 const ProjectOverview = () => {
     const currentWorkspace = useAppSelector((state) => state.workspace.currentWorkspace);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const projects = currentWorkspace.projects || [];
+    const projects = currentWorkspace?.projects || [];
 
     // Helper functions to get status and priority colors
     const getStatusColor = (status: string) => STATUSCOLORS[status as keyof typeof STATUSCOLORS] || STATUSCOLORS.PLANNING;

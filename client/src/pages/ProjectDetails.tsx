@@ -26,7 +26,7 @@ const tabs = [
 const getStatusColor = (status: string) => STATUSCOLORS[status as keyof typeof STATUSCOLORS] || STATUSCOLORS.PLANNING;
 
 const ProjectDetails = () => {
-    const projects = useAppSelector((state) => state.workspace.currentWorkspace.projects || []);
+    const projects = useAppSelector((state) => state.workspace.currentWorkspace?.projects || []);
     const [searchParams, setSearchParams] = useSearchParams();
     const id = searchParams.get('id');
     const tab = searchParams.get('tab');

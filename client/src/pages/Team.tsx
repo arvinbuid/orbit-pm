@@ -7,9 +7,9 @@ const Team = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
-    const users = currentWorkspace.members || [];
-    const tasks = currentWorkspace.projects.reduce((acc, project) => acc + project.tasks.length, 0);
-    const projects = currentWorkspace.projects || [];
+    const users = currentWorkspace?.members || [];
+    const tasks = currentWorkspace?.projects.reduce((acc, project) => acc + project.tasks.length, 0);
+    const projects = currentWorkspace?.projects || [];
     const filteredUsers = users.filter(
         (user) =>
             user.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

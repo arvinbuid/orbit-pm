@@ -20,24 +20,24 @@ type FilteredProduct = {
 }
 
 const Projects = () => {
-    const [filteredProjects, setFilteredProjects] = useState<FilteredProduct[]>([]);
+    const [filteredProjects, setFilteredProjects] = useState<FilteredProduct[] | undefined>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [filters, setFilters] = useState({ status: "ALL", priority: "ALL", });
 
-    const projects = useAppSelector((state) => state.workspace.currentWorkspace.projects);
+    const projects = useAppSelector((state) => state.workspace.currentWorkspace?.projects);
 
     useEffect(() => {
         let filtered = projects;
         const filterProjects = () => {
             if (searchTerm !== "") {
-                filtered = filtered.filter((project) =>
+                filtered = filtered!.filter((project) =>
                     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     project.description.toLowerCase().includes(searchTerm.toLowerCase())
                 );
             }
-            if (filters.status !== "ALL") filtered = filtered.filter((project) => project.status === filters.status);
-            if (filters.priority !== "ALL") filtered = filtered.filter((project) => project.priority === filters.priority);
+            if (filters.status !== "ALL") filtered = filtered!.filter((project) => project.status === filters.status);
+            if (filters.priority !== "ALL") filtered = filtered!.filter((project) => project.priority === filters.priority);
 
             setFilteredProjects(filtered);
         };
@@ -101,7 +101,7 @@ const Projects = () => {
 
             {/* Projects Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProjects.length === 0 ? (
+                {filteredProjects?.length === 0 ? (
                     <div className="col-span-full text-center py-16">
                         <div className="w-24 h-24 mx-auto mb-6 bg-gray-200 dark:bg-zinc-800 rounded-full flex items-center justify-center">
                             <FolderOpen className="w-12 h-12 text-gray-400 dark:text-zinc-500" />
@@ -121,7 +121,7 @@ const Projects = () => {
                         </button>
                     </div>
                 ) : (
-                    filteredProjects.map((project) => (
+                    filteredProjects?.map((project) => (
                         <ProjectCard key={project.id} project={project} />
                     ))
                 )}

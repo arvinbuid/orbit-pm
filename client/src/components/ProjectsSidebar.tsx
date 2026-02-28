@@ -9,7 +9,7 @@ const ProjectsSidebar = () => {
     const [searchParams] = useSearchParams();
 
     const projects = useAppSelector(
-        (state) => state.workspace.currentWorkspace.projects || []
+        (state) => state.workspace.currentWorkspace?.projects || []
     );
 
     const getProjectSubItems = (projectId: string) => [
