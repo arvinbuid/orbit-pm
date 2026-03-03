@@ -1,6 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
 import { useAppSelector } from "../app/hooks";
 import { ArrowRight, Clock, AlertTriangle, User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const TEXTPRIORITYCOLOR = {
     "LOW": "text-zinc-600 dark:text-zinc-400",
@@ -51,6 +52,8 @@ const TaskSummary = () => {
         }
     ];
 
+    console.log(currentWorkspace?.projects)
+
     return (
         <div className="space-y-6">
             {summaryCards.map((card) => (
@@ -79,22 +82,29 @@ const TaskSummary = () => {
                         ) : (
                             <div className="space-y-3">
                                 {card.items.map((issue) => (
-                                    <div
-                                        key={issue.id}
-                                        className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                                    >
-                                        <h4 className="text-sm font-medium text-gray-800 dark:text-white truncate">
-                                            {issue.title}
-                                        </h4>
-                                        <p className={`text-xs ${TEXTPRIORITYCOLOR[issue.priority as keyof typeof TEXTPRIORITYCOLOR]} capitalize mt-1`}>
-                                            {issue.type} • {issue.priority} priority
-                                        </p>
+                                    <div>
+                                        <Link to={`/projectsDetail?id=${currentWorkspace?.projects[0].id}&tab=tasks`}>
+                                            <div
+                                                key={issue.id}
+                                                className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                                            >
+                                                <h4 className="text-sm font-medium text-gray-800 dark:text-white truncate">
+                                                    {issue.title}
+                                                </h4>
+                                                <p className={`text-xs ${TEXTPRIORITYCOLOR[issue.priority as keyof typeof TEXTPRIORITYCOLOR]} capitalize mt-1`}>
+                                                    {issue.type} • {issue.priority} priority
+                                                </p>
+                                            </div>
+                                        </Link>
                                     </div>
                                 ))}
                                 {card.count > 3 && (
-                                    <button className="flex items-center justify-center w-full text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-white mt-2">
+                                    <Link
+                                        to={`/projectsDetail?id=${currentWorkspace?.projects[0].id}&tab=tasks`}
+                                        className="flex items-center justify-center w-full text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-white mt-2"
+                                    >
                                         View {card.count - 3} more <ArrowRight className="w-3 h-3 ml-2" />
-                                    </button>
+                                    </Link>
                                 )}
                             </div>
                         )}
