@@ -9,8 +9,9 @@ const StatsGrid = () => {
     const stats = useMemo(() => {
         const dashboardStats = {
             totalProjects: 0,
+            totalProjectTasks: 0,
             activeProjects: 0,
-            completedProjects: 0,
+            completedTasks: 0,
             myTasks: 0,
             overdueIssues: 0,
         }
@@ -18,26 +19,27 @@ const StatsGrid = () => {
         if (!currentWorkspace) return dashboardStats;
 
         const totalProjects = currentWorkspace.projects.length;
+        const totalProjectTasks = currentWorkspace.projects.flatMap((p) => p.tasks).length;
         const activeProjects = currentWorkspace.projects.filter(
             (p) => p.status !== "CANCELLED" && p.status !== "COMPLETED").length;
-        const completedProjects = currentWorkspace.projects
-            .filter((p) => p.status === "COMPLETED")
-            .reduce((acc, project) => acc + project.tasks.length, 0);
+        const completedTasks = currentWorkspace.projects
+            .flatMap((p) => p.tasks)
+            .filter((t) => t.status === "DONE")
+            .length;
         const myTasks = currentWorkspace.projects
-            .reduce((acc, project) => acc + project.tasks
-                .filter((t) => t.assignee.email === currentWorkspace.owner.email).length, 0);
+            .flatMap((p) => p.tasks)
+            .filter((t) => t.assignee.email === currentWorkspace.owner.email)
+            .length;
         const overdueIssues = currentWorkspace.projects
-            .reduce((acc, project) => acc + project.tasks
-                .filter((task) => {
-                    if (task.due_date < new Date().toISOString()) {
-                        return true
-                    }
-                    return false
-                }).length, 0);
+            .flatMap((p) => p.tasks)
+            .filter((t) => t.due_date < new Date().toISOString())
+            .length;
+
         return {
             totalProjects,
+            totalProjectTasks,
             activeProjects,
-            completedProjects,
+            completedTasks,
             myTasks,
             overdueIssues
         }
@@ -54,9 +56,9 @@ const StatsGrid = () => {
         },
         {
             icon: CheckCircle,
-            title: "Completed Projects",
-            value: stats.completedProjects,
-            subtitle: `of ${stats.totalProjects} total`,
+            title: "Completed Tasks",
+            value: stats.completedTasks,
+            subtitle: `of ${stats.totalProjectTasks} total`,
             bgColor: "bg-emerald-500/10",
             textColor: "text-emerald-500",
         },
