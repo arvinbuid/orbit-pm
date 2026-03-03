@@ -30,9 +30,18 @@ const StatsGrid = () => {
             .flatMap((p) => p.tasks)
             .filter((t) => t.assignee.email === currentWorkspace.owner.email)
             .length;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // normalize to start of day
+
         const overdueIssues = currentWorkspace.projects
             .flatMap((p) => p.tasks)
-            .filter((t) => t.due_date < new Date().toISOString())
+            .filter((t) => {
+                if (!t.due_date || t.status === 'DONE') return false;
+                const dueDate = new Date(t.due_date);
+                dueDate.setHours(0, 0, 0, 0);
+                return dueDate < today;
+            })
             .length;
 
         return {
@@ -79,6 +88,9 @@ const StatsGrid = () => {
             textColor: "text-amber-500",
         },
     ];
+
+    console.log('Due Date from DB: ', currentWorkspace?.projects.flatMap((p) => p.tasks));
+    console.log(new Date().toISOString())
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-9">

@@ -17,7 +17,14 @@ const TaskSummary = () => {
 
     const tasks = currentWorkspace?.projects.flatMap((project) => project.tasks) || [];
     const myTasks = tasks.filter(i => i.assigneeId === user.id);
-    const overdueTasks = tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'DONE');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // normalize to start of day
+    const overdueTasks = tasks.filter((t) => {
+        if (!t.due_date || t.status === 'DONE') return false;
+        const dueDate = new Date(t.due_date);
+        dueDate.setHours(0, 0, 0, 0);
+        return dueDate < today;
+    })
     const inProgressIssues = tasks.filter(i => i.status === 'IN_PROGRESS');
 
     const summaryCards = [
