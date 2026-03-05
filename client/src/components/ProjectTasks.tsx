@@ -88,25 +88,28 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
     };
 
     const handleDelete = async () => {
-        try {
-            // Check if selected task is one or more
-            const selectedTaskCount = selectedTasks.length;
-            const confirm = window.confirm(`Are you sure you want to delete the selected task${selectedTaskCount < 2 ? "" : "s"}?`);
-            if (!confirm) return;
+        // Check if selected task is one or more
+        const selectedTaskCount = selectedTasks.length;
+        const confirm = window.confirm(`Are you sure you want to delete the selected task${selectedTaskCount < 2 ? "" : "s"}?`);
+        if (!confirm) return;
 
-            toast.loading("Deleting tasks...");
+        try {
             const token = await getToken();
 
-            await api.post('/api/tasks/delete', { taskIds: selectedTasks }, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            await toast.promise(
+                api.post('/api/tasks/delete', { taskIds: selectedTasks }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }),
+                {
+                    loading: 'Deleting tasks...',
+                    success: 'Tasks deleted successfully.',
                 }
-            })
+            );
 
             dispatch(deleteTask(selectedTasks));
             setSelectedTasks([]);
-            toast.dismissAll();
-            toast.success("Tasks deleted successfully");
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 toast.error(error.response?.data.message || error.message);
