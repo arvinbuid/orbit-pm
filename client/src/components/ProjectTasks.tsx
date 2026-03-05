@@ -41,9 +41,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
     });
     const { getToken } = useAuth();
 
-    const assigneeList = useMemo(() => {
-        return Array.from(new Set(tasks.map((t) => t.assignee))).filter(Boolean);
-    }, [tasks])
+    const assigneeList = Array.from(new Map(tasks.filter((t) => t.assignee.id).map((t) => [t.assignee.id, t.assignee.name])));
 
     const filteredTasks = useMemo(() => {
         return tasks.filter((task) => {
@@ -52,7 +50,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
                 (!status || task.status === status) &&
                 (!type || task.type === type) &&
                 (!priority || task.priority === priority) &&
-                (!assignee || task.assignee?.name === assignee)
+                (!assignee || task.assignee?.id === assignee)
             )
         })
     }, [filters, tasks]);
@@ -91,7 +89,9 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
 
     const handleDelete = async () => {
         try {
-            const confirm = window.confirm("Are you sure you want to delete the selected tasks?");
+            // Check if selected task is one or more
+            const selectedTaskCount = selectedTasks.length;
+            const confirm = window.confirm(`Are you sure you want to delete the selected task${selectedTaskCount < 2 ? "" : "s"}?`);
             if (!confirm) return;
 
             toast.loading("Deleting tasks...");
@@ -104,6 +104,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
             })
 
             dispatch(deleteTask(selectedTasks));
+            setSelectedTasks([]);
             toast.dismissAll();
             toast.success("Tasks deleted successfully");
         } catch (error) {
@@ -144,7 +145,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
                         ],
                         assignee: [
                             { label: "All Assignees", value: "" },
-                            ...assigneeList.map((a) => ({ label: a.name, value: a.id })),
+                            ...assigneeList.map((a) => ({ label: a[1], value: a[0] }))
                         ],
                     };
                     return (
@@ -228,7 +229,8 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
                                                 >
                                                     <input
                                                         type="checkbox"
-                                                        className="size-3 accent-zinc-600 dark:accent-zinc-500" onChange={() => selectedTasks.includes(task.id) ? setSelectedTasks(selectedTasks.filter((i) => i !== task.id)) : setSelectedTasks((prev) => [...prev, task.id])}
+                                                        className="size-3 accent-zinc-600 dark:accent-zinc-500"
+                                                        onChange={() => selectedTasks.includes(task.id) ? setSelectedTasks(selectedTasks.filter((i) => i !== task.id)) : setSelectedTasks((prev) => [...prev, task.id])}
                                                         checked={selectedTasks.includes(task.id)}
                                                     />
                                                 </td>
@@ -260,7 +262,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <div className="flex items-center gap-2">
-                                                        <img src={task.assignee.image} className="size-5 rounded-full" alt="avatar" />
+                                                        <img src={task.assignee?.image} className="size-5 rounded-full" alt="avatar" />
                                                         {task.assignee?.name || "-"}
                                                     </div>
                                                 </td>
