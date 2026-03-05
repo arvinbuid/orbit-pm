@@ -78,7 +78,6 @@ const workspaceSlice = createSlice({
     addTask: (state, action) => {
       if (!state.currentWorkspace) return;
       state.currentWorkspace.projects = state.currentWorkspace?.projects.map((p) => {
-        console.log(p.id, action.payload.projectId, p.id === action.payload.projectId);
         if (p.id === action.payload.projectId) {
           p.tasks.push(action.payload);
         }

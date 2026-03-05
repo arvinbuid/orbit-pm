@@ -20,7 +20,6 @@ function WorkspaceDropdown() {
     const onSelectWorkspace = (organizationId: string) => {
         if (!setActive) return;
         setActive({ organization: organizationId });
-        console.log(organizationId)
         dispatch(setCurrentWorkspace(organizationId))
         setIsOpen(false);
         navigate('/')
