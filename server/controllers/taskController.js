@@ -73,7 +73,7 @@ export const updateTask = async (req, res) => {
     if (!project) {
       return res.status(404).json({message: "Project not found."});
     } else if (project.team_lead !== userId) {
-      return res.status(403).json({message: "You do not have permission to create tasks for this project."});
+      return res.status(403).json({message: "You do not have permission to update tasks for this project."});
     }
 
     // Update task
@@ -110,7 +110,7 @@ export const deleteTask = async (req, res) => {
     if (!project) {
       return res.status(404).json({message: "Project not found."});
     } else if (project.team_lead !== userId) {
-      return res.status(403).json({message: "You do not have permission to create tasks for this project."});
+      return res.status(403).json({message: "You do not have permission to delete tasks for this project."});
     }
 
     await prisma.task.deleteMany({
