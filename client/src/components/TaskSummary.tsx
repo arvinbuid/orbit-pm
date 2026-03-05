@@ -52,8 +52,6 @@ const TaskSummary = () => {
         }
     ];
 
-    console.log(currentWorkspace?.projects)
-
     return (
         <div className="space-y-6">
             {summaryCards.map((card) => (
@@ -82,7 +80,7 @@ const TaskSummary = () => {
                         ) : (
                             <div className="space-y-3">
                                 {card.items.map((issue) => (
-                                    <div>
+                                    <div key={issue.id}>
                                         <Link to={`/projectsDetail?id=${currentWorkspace?.projects[0].id}&tab=tasks`}>
                                             <div
                                                 key={issue.id}
