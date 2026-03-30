@@ -148,7 +148,10 @@ export const addMember = async (req, res) => {
     // Check if user is project lead
     const project = await prisma.project.findUnique({
       where: {id: projectId},
-      include: {members: {include: {user: true}}},
+      include: {
+        members: {include: {user: true}},
+        workspace: {include: {members: true}},
+      },
     });
 
     if (!project) {
@@ -171,6 +174,12 @@ export const addMember = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({message: "User not found."});
+    }
+
+    const workspaceMember = project.workspace.members.find((member) => member.userId === user.id);
+
+    if (!workspaceMember) {
+      return res.status(400).json({message: "User must be a workspace member before joining this project."});
     }
 
     // Add member to project

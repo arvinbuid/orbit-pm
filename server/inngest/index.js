@@ -120,11 +120,24 @@ const syncWorkspaceMemberCreation = inngest.createFunction(
   {event: "clerk/organizationInvitation.accepted"},
   async ({event}) => {
     const {data} = event;
-    await prisma.workspaceMember.create({
+    const normalizedRole = String(data.role ?? data.role_name ?? "org:member")
+      .replace(/^org:/i, "")
+      .toUpperCase();
+
+    await prisma.workspaceMember.upsert({
+      where: {
+        userId_workspaceId: {
+          userId: data.user_id,
+          workspaceId: data.organization_id,
+        },
+      },
       data: {
+        role: normalizedRole,
+      },
+      create: {
         userId: data.user_id,
         workspaceId: data.organization_id,
-        role: String(data.role_name).toUpperCase(),
+        role: normalizedRole,
       },
     });
   },
