@@ -14,8 +14,8 @@ function App() {
       <Toaster />
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path="/dashboard" element={<Layout />}>
-          <Route index element={<Dashboard />} />
+        <Route element={<Layout />}>
+          <Route path='dashboard' element={<Dashboard />} />
           <Route path="team" element={<Team />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projectsDetail" element={<ProjectDetails />} />
