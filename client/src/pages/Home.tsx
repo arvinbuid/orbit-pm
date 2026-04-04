@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 const Home = () => {
+    const navigate = useNavigate();
+
     return (
         <div className="flex bg-white dark:bg-zinc-950 text-gray-900 dark:text-slate-100">
             <div className="flex flex-1 flex-col h-screen">
@@ -10,8 +14,13 @@ const Home = () => {
                         </div>
                         <div>
                             <ul className="flex items-center gap-4 hover:cursor-pointer text-sm">
-                                <li>Sign In</li>
-                                <li className="px-6 py-1.5 rounded-full bg-blue-600 text-slate-50 hover:bg-blue-700 transition-colors">Sign Up</li>
+                                <li onClick={() => navigate('/sign-in')}>Sign In</li>
+                                <li
+                                    onClick={() => navigate('/sign-up')}
+                                    className="px-6 py-1.5 rounded-full bg-blue-600 text-slate-50 hover:bg-blue-700 transition-colors"
+                                >
+                                    Sign Up
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -36,7 +45,12 @@ const Home = () => {
                                     unified workspace designed for speed.
                                 </p>
                                 <div className="mt-4 sm:mt-8">
-                                    <button className="px-6 py-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors">Get Started</button>
+                                    <button
+                                        onClick={() => navigate('/sign-in')}
+                                        className="px-6 py-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors"
+                                    >
+                                        Get Started
+                                    </button>
                                 </div>
                             </div>
                         </div>

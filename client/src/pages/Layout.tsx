@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { loadTheme } from '../features/themeSlice';
 import { Loader2Icon } from 'lucide-react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar';
-import { CreateOrganization, SignIn, useAuth, useUser, } from '@clerk/clerk-react';
+import { SignIn, useAuth, useUser, } from '@clerk/clerk-react';
 import { fetchWorkspaces } from '../features/workspaceSlice';
 
 const Layout = () => {
@@ -44,11 +44,7 @@ const Layout = () => {
     }
 
     if (user && workspaces.length === 0) {
-        return (
-            <div className='min-h-screen flex justify-center items-center'>
-                <CreateOrganization />
-            </div>
-        )
+        return <Navigate to="/create-organization" />
     }
 
     return (
