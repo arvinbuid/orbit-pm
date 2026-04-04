@@ -3,10 +3,10 @@ const Home = () => {
         <div className="flex bg-white dark:bg-zinc-950 text-gray-900 dark:text-slate-100">
             <div className="flex flex-1 flex-col h-screen">
                 {/* Navbar */}
-                <nav className="h-16 shadow-sm">
+                <nav className="shadow-sm py-3">
                     <div className="max-w-6xl h-full flex justify-between items-center mx-auto px-6 text-md">
                         <div>
-                            <p className="select-none font-semibold uppercase tracking-wide">Orbit<span className="text-blue-600">PM</span></p>
+                            <p className="select-none font-bold uppercase tracking-wide">Orbit<span className="text-blue-600">PM</span></p>
                         </div>
                         <div>
                             <ul className="flex items-center gap-4 hover:cursor-pointer text-sm">
@@ -18,9 +18,9 @@ const Home = () => {
                 </nav>
                 {/* Hero */}
                 <div>
-                    <div className="max-w-6xl grid grid-cols-2 mx-auto h-[90vh]">
+                    <div className="max-w-6xl grid grid-cols-1 md:grid-cols-2 mx-auto md:h-[90vh]">
                         {/* Left */}
-                        <div className="flex mt-[20vh] px-4">
+                        <div className="flex items-center px-6 mt-9 md:mt-0">
                             <div className="space-y-5">
                                 <div className="inline-flex">
                                     <p className="flex items-center gap-3 border border-gray-300 shadow-sm rounded-full px-4 py-2 text-xs">
@@ -28,29 +28,31 @@ const Home = () => {
                                         New Feature: Chat System
                                     </p>
                                 </div>
-                                <h1 className="text-5xl font-bold leading-14">The Productivity App for
+                                <h1 className="text-4xl sm:text-5xl font-bold leading-12 sm:leading-14 text-left">The Productivity App for
                                     Modern Teams
                                 </h1>
                                 <p>
                                     Stop switching apps. Manage tasks, docs and goals in one
                                     unified workspace designed for speed.
                                 </p>
-                                <div className="mt-8">
-                                    <button className="px-6 py-2 bg-blue-600 rounded-full text-white">Get Started</button>
+                                <div className="mt-4 sm:mt-8">
+                                    <button className="px-6 py-2 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition-colors">Get Started</button>
                                 </div>
                             </div>
                         </div>
                         {/* Right */}
-                        <div className="flex justify-center items-center">
+                        <div className="flex md:justify-center md:items-center px-6 md:px-4 mt-9     md:mt-0">
                             {/* <img src="images/hero-img.png" className="w-md" /> */}
-                            <div className="h-auto bg-blue-500 rounded-3xl overflow-hidden">
-                                <img src="images/hero-img.png" />
+                            <div>
+                                <div className="h-auto rounded-3xl overflow-hidden">
+                                    <img src="images/hero-img.png" />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
