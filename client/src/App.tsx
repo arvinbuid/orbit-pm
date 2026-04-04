@@ -6,13 +6,15 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import TaskDetails from "./pages/TaskDetails";
 import { Toaster } from "react-hot-toast";
+import Home from "./pages/Home";
 
 function App() {
   return (
     <>
       <Toaster />
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path='/' element={<Home />} />
+        <Route path="/dashboard" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="team" element={<Team />} />
           <Route path="projects" element={<Projects />} />
