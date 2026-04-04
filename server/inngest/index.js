@@ -6,15 +6,39 @@ import {buildEmailBody} from "../utils.js";
 // Create a client to send and receive events
 export const inngest = new Inngest({id: "project-management-lenis"});
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const waitForUserSync = async (userId, attempts = 10, delayMs = 1000) => {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const user = await prisma.user.findUnique({where: {id: userId}});
+
+    if (user) {
+      return user;
+    }
+
+    await sleep(delayMs);
+  }
+
+  return null;
+};
+
 // Inngest functions for Users
 const syncUserCreation = inngest.createFunction(
   {id: "sync-user-from-clerk"},
   {event: "clerk/user.created"},
   async ({event}) => {
     const {data} = event;
-    await prisma.user.create({
-      data: {
+    await prisma.user.upsert({
+      where: {
         id: data.id,
+      },
+      create: {
+        id: data.id,
+        email: data?.email_addresses[0]?.email_address,
+        name: data?.first_name + " " + data?.last_name,
+        image: data?.image_url,
+      },
+      update: {
         email: data?.email_addresses[0]?.email_address,
         name: data?.first_name + " " + data?.last_name,
         image: data?.image_url,
@@ -60,9 +84,26 @@ const syncWorkspaceCreation = inngest.createFunction(
   {event: "clerk/organization.created"},
   async ({event}) => {
     const {data} = event;
-    await prisma.workspace.create({
-      data: {
+
+    const owner = await waitForUserSync(data.created_by);
+
+    if (!owner) {
+      throw new Error(`Workspace owner ${data.created_by} is not synced yet.`);
+    }
+
+    await prisma.workspace.upsert({
+      where: {
         id: data.id,
+      },
+      create: {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data?.description,
+        ownerId: data.created_by,
+        image_url: data.image_url,
+      },
+      update: {
         name: data.name,
         slug: data.slug,
         description: data?.description,
@@ -72,8 +113,17 @@ const syncWorkspaceCreation = inngest.createFunction(
     });
 
     // Add creator as admin member
-    await prisma.workspaceMember.create({
-      data: {
+    await prisma.workspaceMember.upsert({
+      where: {
+        userId_workspaceId: {
+          userId: data.created_by,
+          workspaceId: data.id,
+        },
+      },
+      update: {
+        role: "ADMIN",
+      },
+      create: {
         userId: data.created_by,
         workspaceId: data.id,
         role: "ADMIN",
@@ -131,7 +181,7 @@ const syncWorkspaceMemberCreation = inngest.createFunction(
           workspaceId: data.organization_id,
         },
       },
-      data: {
+      update: {
         role: normalizedRole,
       },
       create: {

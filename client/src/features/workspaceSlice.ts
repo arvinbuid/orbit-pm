@@ -5,7 +5,10 @@ import api from "../configs/api";
 
 export const fetchWorkspaces = createAsyncThunk(
   "workspace/fetcWorkspaces",
-  async ({getToken}: {getToken: () => Promise<string | null>}) => {
+  async (
+    {getToken}: {getToken: () => Promise<string | null>},
+    {rejectWithValue},
+  ) => {
     try {
       const {data} = await api.get("/api/workspaces", {
         headers: {
@@ -15,9 +18,14 @@ export const fetchWorkspaces = createAsyncThunk(
       return data.workspaces || [];
     } catch (err) {
       if (err instanceof AxiosError) {
-        console.error(err.response?.data.message || err.message);
+        const message = err.response?.data.message || err.message;
+        console.error(message);
+        return rejectWithValue(message);
       }
-      return [];
+
+      const message = "Unable to load workspaces.";
+      console.error(message);
+      return rejectWithValue(message);
     }
   },
 );
@@ -26,12 +34,16 @@ type InitialState = {
   workspaces: Workspace[];
   currentWorkspace: Workspace | null;
   loading: boolean;
+  initialized: boolean;
+  error: string | null;
 };
 
 const initialState: InitialState = {
   workspaces: [],
   currentWorkspace: null,
   loading: false,
+  initialized: false,
+  error: null,
 };
 
 const workspaceSlice = createSlice({
@@ -147,9 +159,11 @@ const workspaceSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(fetchWorkspaces.pending, (state) => {
       state.loading = true;
+      state.error = null;
     });
     builder.addCase(fetchWorkspaces.fulfilled, (state, action) => {
       state.workspaces = action.payload;
+      state.currentWorkspace = null;
 
       if (action.payload.length > 0) {
         const localStorageCurrentWorkspaceId = localStorage.getItem("currentWorkspaceId");
@@ -169,9 +183,13 @@ const workspaceSlice = createSlice({
       }
 
       state.loading = false;
+      state.initialized = true;
     });
-    builder.addCase(fetchWorkspaces.rejected, (state) => {
+    builder.addCase(fetchWorkspaces.rejected, (state, action) => {
       state.loading = false;
+      state.initialized = true;
+      state.error =
+        typeof action.payload === "string" ? action.payload : "Unable to load workspaces.";
     });
   },
 });
