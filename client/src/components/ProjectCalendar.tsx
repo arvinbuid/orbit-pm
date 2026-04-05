@@ -99,19 +99,17 @@ const ProjectCalendar = ({ tasks }: ProjectCalendarProps) => {
                     <h3 className="text-zinc-900 dark:text-white text-lg mb-3">
                         Tasks for {format(selectedDate, "MMM d, yyyy")}
                     </h3>
-                    <div className="space-y-3">
+                    <div>
                         {getTasksForDate(selectedDate).map((task) => (
                             <div
                                 key={task.id}
                                 className={`bg-zinc-50 dark:bg-zinc-800/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition p-4 rounded border-l-4 ${PRIORITYBORDERS[task.priority as keyof typeof PRIORITYBORDERS]}`}
                             >
-                                <div className="flex justify-between mb-2">
-                                    <h4 className="text-zinc-900 dark:text-white font-medium">{task.title}</h4>
-                                    <span className={`px-2 py-0.5 rounded text-xs ${TYPECOLORS[task.type as keyof typeof TYPECOLORS]}`}>
-                                        {task.type}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400">
+                                <h4 className="text-zinc-900 dark:text-white mb-1 font-medium">{task.title}</h4>
+                                <span className={`px-2 py-0.5 rounded text-xs ${TYPECOLORS[task.type as keyof typeof TYPECOLORS]}`}>
+                                    {task.type}
+                                </span>
+                                <div className="mt-1 flex justify-between text-xs text-zinc-600 dark:text-zinc-400">
                                     <span className="capitalize">{task.priority.toLowerCase()} priority</span>
                                     {task.assignee && (
                                         <span className="flex items-center gap-1">
@@ -169,15 +167,17 @@ const ProjectCalendar = ({ tasks }: ProjectCalendarProps) => {
                                         key={task.id}
                                         className="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 p-3 rounded-lg transition"
                                     >
-                                        <div className="flex justify-between text-sm text-zinc-900 dark:text-white">
-                                            <span>{task.title}</span>
-                                            <span className="text-xs px-2 py-0.5 rounded bg-red-200 dark:bg-red-500 text-red-900 dark:text-red-900">
-                                                {task.type}
-                                            </span>
+                                        <div>
+                                            <span className="text-sm text-zinc-900 dark:text-white">{task.title}</span>
+                                            <div>
+                                                <span className="text-xs px-2 py-0.5 rounded bg-red-200 dark:bg-red-500 text-red-900 dark:text-red-900">
+                                                    {task.type}
+                                                </span>
+                                                <p className="mt-0.5 text-xs text-red-600 dark:text-red-300">
+                                                    Due {format(task.due_date, "MMM d")}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <p className="text-xs text-red-600 dark:text-red-300">
-                                            Due {format(task.due_date, "MMM d")}
-                                        </p>
                                     </div>
                                 ))}
                             {overdueTasks.length > 5 && (

@@ -182,7 +182,10 @@ const ProjectSettings = ({ project }: ProjectSettingsProps) => {
                         >
                             <Plus className="size-4 text-zinc-900 dark:text-zinc-300" />
                         </button>
-                        <AddProjectMember isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
+                        <AddProjectMember
+                            isDialogOpen={isDialogOpen}
+                            setIsDialogOpen={setIsDialogOpen}
+                        />
                     </div>
 
                     {/* Member List */}
@@ -191,10 +194,14 @@ const ProjectSettings = ({ project }: ProjectSettingsProps) => {
                             {project.members.map((member, index) => (
                                 <div
                                     key={index}
-                                    className="flex items-center justify-between px-3 py-2 rounded dark:bg-zinc-800 text-sm text-zinc-900 dark:text-zinc-300"
+                                    className="flex items-center justify-between gap-2 px-3 py-2 rounded dark:bg-zinc-800 text-sm text-zinc-900 dark:text-zinc-300"
                                 >
-                                    <span> {member?.user?.email || "Unknown"} </span>
-                                    {project.team_lead === member.user.id && <span className="px-2 py-0.5 rounded-xs ring ring-zinc-200 dark:ring-zinc-600">Team Lead</span>}
+                                    <span> {member?.user?.email || "Unknown"}</span>
+                                    {project.team_lead === member.user.id &&
+                                        <span className="px-2 py-0.5 rounded-xs ring ring-zinc-200 dark:ring-zinc-600 text-nowrap">
+                                            Team Lead
+                                        </span>
+                                    }
                                 </div>
                             ))}
                         </div>

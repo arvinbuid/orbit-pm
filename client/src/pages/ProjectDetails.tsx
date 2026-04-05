@@ -89,13 +89,15 @@ const ProjectDetails = () => {
                 {infoCards.map((card, idx) => (
                     <div
                         key={idx}
-                        className=" dark:bg-linear-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex justify-between sm:min-w-60 p-4 py-2.5 rounded"
+                        className="dark:bg-linear-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex justify-between sm:min-w-60 p-4 py-2.5 rounded"
                     >
                         <div>
-                            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">{card.label}</div>
+                            <div className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                                {card.label}
+                            </div>
                             <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
                         </div>
-                        <ZapIcon className={`size-4 ${card.color}`} />
+                        <ZapIcon className={`size-4 ${card.color} mt-0.5`} />
                     </div>
                 ))}
             </div>
@@ -110,12 +112,14 @@ const ProjectDetails = () => {
                                 if (!id) return;
                                 setSearchParams({ id, tab: tabItem.key });
                             }}
-                            className={`flex items-center gap-2 px-4 py-2 text-sm transition-all 
+                            className={`flex items-center justify-center gap-2 px-2 py-2 text-sm transition-all 
                                 ${activeTab === tabItem.key ? "bg-zinc-100 dark:bg-zinc-800/80"
                                     : "hover:bg-zinc-50 dark:hover:bg-zinc-700"}`}
                         >
-                            <tabItem.icon className="size-3.5" />
-                            {tabItem.label}
+                            <div className="flex items-center gap-1.5">
+                                <tabItem.icon className="size-3.5" />
+                                {tabItem.label}
+                            </div>
                         </button>
                     ))}
                 </div>

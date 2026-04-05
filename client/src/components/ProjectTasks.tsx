@@ -228,7 +228,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
                                             >
                                                 <td
                                                     onClick={e => e.stopPropagation()}
-                                                    className="pl-2 pr-1"
+                                                    className="pl-2 pr-2"
                                                 >
                                                     <input
                                                         type="checkbox"
@@ -237,7 +237,7 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
                                                         checked={selectedTasks.includes(task.id)}
                                                     />
                                                 </td>
-                                                <td className="px-4 pl-0 py-2">{task.title}</td>
+                                                <td className="px-4 pl-0 py-2 text-nowrap">{task.title}</td>
                                                 <td className="px-4 py-2">
                                                     <div className="flex items-center gap-2">
                                                         {Icon && <Icon className={`size-4 ${color}`} />}
@@ -266,13 +266,15 @@ const ProjectTasks = ({ tasks }: ProjectTasksProps) => {
                                                 <td className="px-4 py-2">
                                                     <div className="flex items-center gap-2">
                                                         <img src={task.assignee?.image} className="size-5 rounded-full" alt="avatar" />
-                                                        {task.assignee?.name || "-"}
+                                                        <span className="text-nowrap">{task.assignee?.name || "-"}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <div className="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
                                                         <CalendarIcon className="size-4" />
-                                                        {format(new Date(task.due_date), "dd MMMM")}
+                                                        <span className="text-nowrap">
+                                                            {format(new Date(task.due_date), "dd MMMM")}
+                                                        </span>
                                                     </div>
                                                 </td>
                                             </tr>
