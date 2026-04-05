@@ -51,8 +51,8 @@ const StatsGrid = () => {
             completedTasks,
             myTasks,
             overdueIssues
-        }
-    }, [currentWorkspace])
+        };
+    }, [currentWorkspace]);
 
     const statCards = [
         {
@@ -90,28 +90,29 @@ const StatsGrid = () => {
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-9">
+        <div className="my-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:my-8 lg:gap-6 2xl:grid-cols-4">
             {statCards.map(
                 ({ icon: Icon, title, value, subtitle, bgColor, textColor }, i) => (
-                    <div key={i} className="bg-white dark:bg-zinc-950 dark:bg-linear-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition duration-200 rounded-md" >
-                        <div className="p-6 py-4">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">
-                                        {title}
+                    <div
+                        key={i}
+                        className="h-full rounded-md border border-zinc-200 bg-white transition duration-200 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:bg-linear-to-br dark:from-zinc-800/70 dark:to-zinc-900/50 dark:hover:border-zinc-700"
+                    >
+                        <div className="flex h-full flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5 lg:p-6">
+                            <div className="min-w-0 flex-1">
+                                <p className="mb-1 text-sm text-zinc-500 dark:text-zinc-400">
+                                    {title}
+                                </p>
+                                <p className="text-2xl font-bold text-zinc-800 dark:text-white sm:text-3xl">
+                                    {value}
+                                </p>
+                                {subtitle && (
+                                    <p className="mt-1 wrap-break-word text-xs text-zinc-400 dark:text-zinc-500">
+                                        {subtitle}
                                     </p>
-                                    <p className="text-3xl font-bold text-zinc-800 dark:text-white">
-                                        {value}
-                                    </p>
-                                    {subtitle && (
-                                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
-                                            {subtitle}
-                                        </p>
-                                    )}
-                                </div>
-                                <div className={`p-3 rounded-xl ${bgColor} bg-opacity-20`}>
-                                    <Icon size={20} className={textColor} />
-                                </div>
+                                )}
+                            </div>
+                            <div className={`w-fit shrink-0 rounded-xl p-3 ${bgColor} bg-opacity-20`}>
+                                <Icon size={20} className={textColor} />
                             </div>
                         </div>
                     </div>
@@ -119,6 +120,6 @@ const StatsGrid = () => {
             )}
         </div>
     );
-}
+};
 
 export default StatsGrid;

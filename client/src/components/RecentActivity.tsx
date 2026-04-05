@@ -62,7 +62,7 @@ const RecentActivity = () => {
                 <h2 className="text-lg text-zinc-800 dark:text-zinc-200">Recent Activity</h2>
             </div>
 
-            <div className="p-0">
+            <div className="p-0 overflow-x-auto">
                 {tasks.length === 0 ? (
                     <div className="p-12 text-center">
                         <div className="w-16 h-16 mx-auto mb-4 bg-zinc-200 dark:bg-zinc-800 rounded-full flex items-center justify-center">
@@ -86,12 +86,12 @@ const RecentActivity = () => {
                                             <TypeIcon className={`w-4 h-4 ${iconColor}`} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between mb-2">
+                                            <div className="flex flex-col lg:flex-row items-start justify-between mb-2">
                                                 <h4 className="text-zinc-800 dark:text-zinc-200 truncate">
                                                     {task.title}
                                                 </h4>
                                                 <span
-                                                    className={`ml-2 px-2 py-1 rounded text-xs ${getStatusColor(task.status) || "bg-zinc-300 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300"}`}
+                                                    className={`mt-1 px-2 py-1 rounded text-xs ${getStatusColor(task.status) || "bg-zinc-300 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300"}`}
                                                 >
                                                     {task.status.replace("_", " ")}
                                                 </span>
