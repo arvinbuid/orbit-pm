@@ -1,20 +1,67 @@
-import { useState } from 'react'
-import { useAppSelector } from '../app/hooks';
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@clerk/clerk-react';
 import { Activity, Search, Shield, UserPlus, UsersIcon } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
 import InviteMemberDialog from '../components/InviteMemberDialog';
+import { refreshWorkspaces } from '../features/workspaceSlice';
 
 const Team = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const dispatch = useAppDispatch();
+    const { getToken } = useAuth();
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
-    const users = currentWorkspace?.members || [];
     const tasks = currentWorkspace?.projects.reduce((acc, project) => acc + project.tasks.length, 0);
     const projects = currentWorkspace?.projects || [];
-    const filteredUsers = users.filter(
-        (user) =>
-            user.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+
+    const users = useMemo(() => {
+        return currentWorkspace?.members || [];
+    }, [currentWorkspace]);
+
+    const filteredUsers = useMemo(() => {
+        const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+        return [...users]
+            .sort((left, right) => {
+                if (left.role !== right.role) {
+                    return left.role === "ADMIN" ? -1 : 1;
+                }
+
+                const leftName = (left.user.name || left.user.email || "").toLowerCase();
+                const rightName = (right.user.name || right.user.email || "").toLowerCase();
+                const nameComparison = leftName.localeCompare(rightName);
+
+                if (nameComparison !== 0) {
+                    return nameComparison;
+                }
+
+                return left.user.email.toLowerCase().localeCompare(right.user.email.toLowerCase());
+            })
+            .filter((user) => {
+                if (!normalizedSearchTerm) {
+                    return true;
+                }
+
+                return (
+                    user.user.name.toLowerCase().includes(normalizedSearchTerm) ||
+                    user.user.email.toLowerCase().includes(normalizedSearchTerm)
+                );
+            });
+    }, [searchTerm, users]);
+
+    useEffect(() => {
+        dispatch(refreshWorkspaces({ getToken }));
+
+        const handleWindowFocus = () => {
+            dispatch(refreshWorkspaces({ getToken }));
+        };
+
+        window.addEventListener("focus", handleWindowFocus);
+
+        return () => {
+            window.removeEventListener("focus", handleWindowFocus);
+        };
+    }, [dispatch, getToken]);
 
     return (
         <div className="space-y-6 max-w-6xl mx-auto">
@@ -123,15 +170,17 @@ const Team = () => {
                                             key={user.id}
                                             className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
                                         >
-                                            <td className="px-6 py-2.5 whitespace-nowrap flex items-center gap-3">
-                                                <img
-                                                    src={user.user.image}
-                                                    alt={user.user.name}
-                                                    className="size-7 rounded-full bg-gray-200 dark:bg-zinc-800"
-                                                />
-                                                <span className="text-sm text-zinc-800 dark:text-white truncate">
-                                                    {user.user?.name || "Unknown User"}
-                                                </span>
+                                            <td className="px-6 py-2.5 whitespace-nowrap">
+                                                <div className="flex items-center gap-3">
+                                                    <img
+                                                        src={user.user.image}
+                                                        alt={user.user.name}
+                                                        className="size-7 rounded-full bg-gray-200 dark:bg-zinc-800"
+                                                    />
+                                                    <span className="text-sm text-zinc-800 dark:text-white truncate">
+                                                        {user.user?.name || "Unknown User"}
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-2.5 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                                                 {user.user.email}

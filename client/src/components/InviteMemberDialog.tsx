@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
 import { useAppSelector } from "../app/hooks";
-import { useOrganization } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import axios from "axios";
+import api from "../configs/api";
 
 interface InviteMemberDialogProps {
     isDialogOpen: boolean;
@@ -14,23 +15,39 @@ const InviteMemberDialog = ({ isDialogOpen, setIsDialogOpen }: InviteMemberDialo
     const { currentWorkspace } = useAppSelector((state) => state.workspace);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({ email: "", role: "org:member", });
-    const { organization } = useOrganization();
+    const { getToken } = useAuth();
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsSubmitting(true)
+        setIsSubmitting(true);
 
         const email = formData.email.trim();
 
         try {
-            await organization?.inviteMember({ emailAddress: email, role: formData.role });
+            if (!currentWorkspace) {
+                throw new Error("No active workspace selected.");
+            }
+
+            const token = await getToken();
+
+            await api.post("/api/workspaces/invite-member", {
+                email,
+                role: formData.role,
+                workspaceId: currentWorkspace.id,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
             toast.success("Invitation sent successfully.");
+            setFormData({ email: "", role: "org:member" });
             setIsDialogOpen(false);
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 toast.error(error.response?.data?.message || error.message);
             } else {
-                toast.error("An unexpected error occurred");
+                toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
             }
         } finally {
             setIsSubmitting(false);

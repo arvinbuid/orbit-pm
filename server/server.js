@@ -5,6 +5,7 @@ import {clerkMiddleware} from "@clerk/express";
 import {serve} from "inngest/express";
 import {inngest, functions} from "./inngest/index.js";
 import {protect} from "./middlewares/authMiddleware.js";
+import {handleClerkWebhook} from "./controllers/clerkWebhookController.js";
 
 import workspaceRouter from "./router/workspaceRoute.js";
 import projectRouter from "./router/projectRoutes.js";
@@ -22,6 +23,9 @@ app.get("/", (req, res) => res.send("Server is live..."));
 
 // Inngest API endpoint
 app.use("/api/inngest", serve({client: inngest, functions}));
+
+// Clerk Webhooks
+app.post("/api/webhooks/clerk", express.raw({type: "application/json"}), handleClerkWebhook);
 
 // Routes
 app.use("/api/workspaces", protect, workspaceRouter);

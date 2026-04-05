@@ -1,113 +1,6 @@
 import {clerkClient} from "@clerk/express";
 import prisma from "../configs/prisma.js";
-
-const workspaceInclude = {
-  members: {include: {user: true}},
-  projects: {
-    include: {
-      tasks: {
-        include: {assignee: true, comments: {include: {user: true}}},
-      },
-      members: {include: {user: true}},
-    },
-  },
-  owner: true,
-};
-
-const normalizeWorkspaceRole = (role) => {
-  const normalizedRole = String(role ?? "org:member")
-    .replace(/^org:/i, "")
-    .toUpperCase();
-
-  return normalizedRole === "ADMIN" ? "ADMIN" : "MEMBER";
-};
-
-const getPrimaryEmail = (user) => {
-  return (
-    user.emailAddresses.find((email) => email.id === user.primaryEmailAddressId)?.emailAddress ||
-    user.emailAddresses[0]?.emailAddress ||
-    ""
-  );
-};
-
-const getUserName = (user) => {
-  const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
-  return fullName || getPrimaryEmail(user) || "Unknown User";
-};
-
-const upsertUserFromClerk = async (clerkUserId) => {
-  const clerkUser = await clerkClient.users.getUser(clerkUserId);
-
-  return prisma.user.upsert({
-    where: {
-      id: clerkUser.id,
-    },
-    create: {
-      id: clerkUser.id,
-      email: getPrimaryEmail(clerkUser),
-      name: getUserName(clerkUser),
-      image: clerkUser.imageUrl,
-    },
-    update: {
-      email: getPrimaryEmail(clerkUser),
-      name: getUserName(clerkUser),
-      image: clerkUser.imageUrl,
-    },
-  });
-};
-
-const syncUserWorkspacesFromClerk = async (userId) => {
-  await upsertUserFromClerk(userId);
-
-  const {data: memberships} = await clerkClient.users.getOrganizationMembershipList({
-    userId,
-    limit: 100,
-  });
-
-  for (const membership of memberships) {
-    const organization = membership.organization;
-    const ownerId = organization.createdBy || userId;
-
-    await upsertUserFromClerk(ownerId);
-
-    await prisma.workspace.upsert({
-      where: {
-        id: organization.id,
-      },
-      create: {
-        id: organization.id,
-        name: organization.name,
-        slug: organization.slug,
-        description: null,
-        ownerId,
-        image_url: organization.imageUrl,
-      },
-      update: {
-        name: organization.name,
-        slug: organization.slug,
-        image_url: organization.imageUrl,
-        ownerId,
-      },
-    });
-
-    await prisma.workspaceMember.upsert({
-      where: {
-        userId_workspaceId: {
-          userId,
-          workspaceId: organization.id,
-        },
-      },
-      create: {
-        userId,
-        workspaceId: organization.id,
-        role: normalizeWorkspaceRole(membership.role),
-      },
-      update: {
-        role: normalizeWorkspaceRole(membership.role),
-      },
-    });
-  }
-};
+import {syncUserWorkspacesFromClerk, workspaceInclude} from "../services/clerkSyncService.js";
 
 const findUserWorkspaces = (userId) =>
   prisma.workspace.findMany({
@@ -126,12 +19,8 @@ export const getUserWorkspaces = async (req, res) => {
       return res.status(401).json({message: "Unauthorized. No valid session."});
     }
 
-    let workspaces = await findUserWorkspaces(userId);
-
-    if (workspaces.length === 0) {
-      await syncUserWorkspacesFromClerk(userId);
-      workspaces = await findUserWorkspaces(userId);
-    }
+    await syncUserWorkspacesFromClerk(userId);
+    const workspaces = await findUserWorkspaces(userId);
 
     res.json({workspaces});
   } catch (err) {
@@ -148,7 +37,6 @@ export const addMember = async (req, res) => {
 
     const user = await prisma.user.findUnique({where: {email}});
 
-    //  Check if user exists
     if (!user) {
       return res.status(404).json({message: "User not found."});
     }
@@ -161,7 +49,6 @@ export const addMember = async (req, res) => {
       return res.status(400).json({message: "Invalid role."});
     }
 
-    // Fetch workspace
     const workspace = await prisma.workspace.findUnique({
       where: {id: workspaceId},
       include: {members: true},
@@ -171,19 +58,16 @@ export const addMember = async (req, res) => {
       return res.status(404).json({message: "Workspace not found."});
     }
 
-    // Check if creator has admin role
     if (!workspace.members.find((member) => member.userId === userId && member.role === "ADMIN")) {
       return res.status(401).json({message: "You do not have admin privileges."});
     }
 
-    // Check if user is already a member
     const existingMember = workspace.members.find((member) => member.userId === user.id);
 
     if (existingMember) {
       return res.status(400).json({message: "User is already a member."});
     }
 
-    // Add member to workspace
     const member = await prisma.workspaceMember.create({
       data: {
         userId: user.id,
@@ -200,5 +84,73 @@ export const addMember = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({message: err.code || err.message});
+  }
+};
+
+export const inviteMember = async (req, res) => {
+  try {
+    const {userId} = req;
+    const {email, role, workspaceId} = req.body;
+
+    if (!email || !role || !workspaceId) {
+      return res.status(400).json({message: "Missing required parameters."});
+    }
+
+    if (!["org:admin", "org:member"].includes(role)) {
+      return res.status(400).json({message: "Invalid role."});
+    }
+
+    const workspace = await prisma.workspace.findUnique({
+      where: {id: workspaceId},
+      include: {members: true},
+    });
+
+    if (!workspace) {
+      return res.status(404).json({message: "Workspace not found."});
+    }
+
+    const isAdmin = workspace.members.some(
+      (member) => member.userId === userId && member.role === "ADMIN",
+    );
+
+    if (!isAdmin) {
+      return res.status(403).json({message: "You do not have admin privileges."});
+    }
+
+    const existingMember = await prisma.user.findUnique({
+      where: {email},
+      include: {workspaces: true},
+    });
+
+    if (
+      existingMember?.workspaces.some((membership) => membership.workspaceId === workspaceId)
+    ) {
+      return res.status(400).json({message: "User is already a member."});
+    }
+
+    const origin = req.get("origin") || process.env.CLIENT_URL || "http://localhost:3000";
+    const redirectUrl = new URL("/accept-invitation", origin);
+    redirectUrl.searchParams.set("workspaceId", workspaceId);
+    redirectUrl.searchParams.set("redirectTo", "/team");
+
+    const invitation = await clerkClient.organizations.createOrganizationInvitation({
+      organizationId: workspaceId,
+      emailAddress: email.trim(),
+      role,
+      inviterUserId: userId,
+      redirectUrl: redirectUrl.toString(),
+      publicMetadata: {
+        workspaceId,
+        redirectTo: "/team",
+      },
+    });
+
+    res.json({
+      invitationId: invitation.id,
+      message: "Invitation sent successfully.",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({message: err.errors?.[0]?.longMessage || err.code || err.message});
   }
 };

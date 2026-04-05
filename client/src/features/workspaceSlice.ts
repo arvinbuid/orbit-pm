@@ -3,31 +3,44 @@ import {AxiosError} from "axios";
 import type {Workspace} from "../types/index";
 import api from "../configs/api";
 
+const loadWorkspacesFromApi = async (
+  getToken: () => Promise<string | null>,
+  rejectWithValue: (value: string) => unknown,
+) => {
+  try {
+    const {data} = await api.get("/api/workspaces", {
+      headers: {
+        Authorization: `Bearer ${await getToken()}`,
+      },
+    });
+    return data.workspaces || [];
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      const message = err.response?.data.message || err.message;
+      console.error(message);
+      return rejectWithValue(message);
+    }
+
+    const message = "Unable to load workspaces.";
+    console.error(message);
+    return rejectWithValue(message);
+  }
+};
+
 export const fetchWorkspaces = createAsyncThunk(
   "workspace/fetcWorkspaces",
   async (
     {getToken}: {getToken: () => Promise<string | null>},
     {rejectWithValue},
-  ) => {
-    try {
-      const {data} = await api.get("/api/workspaces", {
-        headers: {
-          Authorization: `Bearer ${await getToken()}`,
-        },
-      });
-      return data.workspaces || [];
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        const message = err.response?.data.message || err.message;
-        console.error(message);
-        return rejectWithValue(message);
-      }
+  ) => loadWorkspacesFromApi(getToken, rejectWithValue),
+);
 
-      const message = "Unable to load workspaces.";
-      console.error(message);
-      return rejectWithValue(message);
-    }
-  },
+export const refreshWorkspaces = createAsyncThunk(
+  "workspace/refreshWorkspaces",
+  async (
+    {getToken}: {getToken: () => Promise<string | null>},
+    {rejectWithValue},
+  ) => loadWorkspacesFromApi(getToken, rejectWithValue),
 );
 
 type InitialState = {
@@ -44,6 +57,28 @@ const initialState: InitialState = {
   loading: false,
   initialized: false,
   error: null,
+};
+
+const applyWorkspacePayload = (state: InitialState, payload: Workspace[]) => {
+  state.workspaces = payload;
+  state.currentWorkspace = null;
+
+  if (payload.length > 0) {
+    const localStorageCurrentWorkspaceId = localStorage.getItem("currentWorkspaceId");
+    if (localStorageCurrentWorkspaceId) {
+      const findWorkspace = payload.find(
+        (workspace: Workspace) => workspace.id === localStorageCurrentWorkspaceId,
+      );
+
+      if (findWorkspace) {
+        state.currentWorkspace = findWorkspace;
+      } else {
+        state.currentWorkspace = payload[0];
+      }
+    } else {
+      state.currentWorkspace = payload[0];
+    }
+  }
 };
 
 const workspaceSlice = createSlice({
@@ -162,32 +197,21 @@ const workspaceSlice = createSlice({
       state.error = null;
     });
     builder.addCase(fetchWorkspaces.fulfilled, (state, action) => {
-      state.workspaces = action.payload;
-      state.currentWorkspace = null;
-
-      if (action.payload.length > 0) {
-        const localStorageCurrentWorkspaceId = localStorage.getItem("currentWorkspaceId");
-        if (localStorageCurrentWorkspaceId) {
-          const findWorkspace = action.payload.find(
-            (w: Workspace) => w.id === localStorageCurrentWorkspaceId,
-          );
-
-          if (findWorkspace) {
-            state.currentWorkspace = findWorkspace;
-          } else {
-            state.currentWorkspace = action.payload[0];
-          }
-        } else {
-          state.currentWorkspace = action.payload[0];
-        }
-      }
-
+      applyWorkspacePayload(state, action.payload);
       state.loading = false;
       state.initialized = true;
     });
     builder.addCase(fetchWorkspaces.rejected, (state, action) => {
       state.loading = false;
       state.initialized = true;
+      state.error =
+        typeof action.payload === "string" ? action.payload : "Unable to load workspaces.";
+    });
+    builder.addCase(refreshWorkspaces.fulfilled, (state, action) => {
+      applyWorkspacePayload(state, action.payload);
+      state.initialized = true;
+    });
+    builder.addCase(refreshWorkspaces.rejected, (state, action) => {
       state.error =
         typeof action.payload === "string" ? action.payload : "Unable to load workspaces.";
     });

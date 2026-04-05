@@ -46,9 +46,12 @@ VITE_BASEURL=http://localhost:5001
 ```bash
 PORT=5001
 NODE_ENV='development'
+CLIENT_URL=http://localhost:3000
 
 CLERK_PUBLISHABLE_KEY=YOUR_OWN_CLERK_PUBLISHABLE_KEY
 CLERK_SECRET_KEY=YOUR_OWN_CLERK_SECRET_KEY
+CLERK_WEBHOOK_SIGNING_SECRET=YOUR_OWN_CLERK_WEBHOOK_SIGNING_SECRET
+# Backward-compatible fallback supported by the server:
 CLERK_WEBHOOK_SECRET=YOUR_OWN_CLERK_WEBHOOK_SECRET
 
 DATABASE_URL=YOUR_OWN_NEON_DATABASE_URL
@@ -84,3 +87,24 @@ npm run server
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Clerk Webhook Setup
+
+Create a Clerk webhook endpoint that points to:
+
+```bash
+http://localhost:5001/api/webhooks/clerk
+```
+
+Enable these Clerk events for the endpoint:
+
+- `user.created`
+- `user.updated`
+- `user.deleted`
+- `organization.created`
+- `organization.updated`
+- `organization.deleted`
+- `organizationMembership.created`
+- `organizationMembership.updated`
+- `organizationMembership.deleted`
+- `organizationInvitation.accepted`

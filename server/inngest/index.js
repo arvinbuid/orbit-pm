@@ -2,48 +2,22 @@ import {Inngest} from "inngest";
 import prisma from "../configs/prisma.js";
 import sendEmail from "../configs/nodemailer.js";
 import {buildEmailBody} from "../utils.js";
+import {
+  deleteOrganizationMembershipFromWebhookData,
+  syncOrganizationMembershipFromWebhookData,
+  upsertUserFromWebhookData,
+  upsertWorkspaceFromWebhookData,
+} from "../services/clerkSyncService.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({id: "project-management-lenis"});
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const waitForUserSync = async (userId, attempts = 10, delayMs = 1000) => {
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
-    const user = await prisma.user.findUnique({where: {id: userId}});
-
-    if (user) {
-      return user;
-    }
-
-    await sleep(delayMs);
-  }
-
-  return null;
-};
 
 // Inngest functions for Users
 const syncUserCreation = inngest.createFunction(
   {id: "sync-user-from-clerk"},
   {event: "clerk/user.created"},
   async ({event}) => {
-    const {data} = event;
-    await prisma.user.upsert({
-      where: {
-        id: data.id,
-      },
-      create: {
-        id: data.id,
-        email: data?.email_addresses[0]?.email_address,
-        name: data?.first_name + " " + data?.last_name,
-        image: data?.image_url,
-      },
-      update: {
-        email: data?.email_addresses[0]?.email_address,
-        name: data?.first_name + " " + data?.last_name,
-        image: data?.image_url,
-      },
-    });
+    await upsertUserFromWebhookData(event.data);
   },
 );
 
@@ -51,10 +25,9 @@ const syncUserDeletion = inngest.createFunction(
   {id: "delete-user-with-clerk"},
   {event: "clerk/user.deleted"},
   async ({event}) => {
-    const {data} = event;
-    await prisma.user.delete({
+    await prisma.user.deleteMany({
       where: {
-        id: data.id,
+        id: event.data.id,
       },
     });
   },
@@ -64,17 +37,7 @@ const syncUserUpdation = inngest.createFunction(
   {id: "update-user-from-clerk"},
   {event: "clerk/user.updated"},
   async ({event}) => {
-    const {data} = event;
-    await prisma.user.update({
-      where: {
-        id: data.id,
-      },
-      data: {
-        email: data?.email_addresses[0]?.email_address,
-        name: data?.first_name + " " + data?.last_name,
-        image: data?.image_url,
-      },
-    });
+    await upsertUserFromWebhookData(event.data);
   },
 );
 
@@ -83,52 +46,7 @@ const syncWorkspaceCreation = inngest.createFunction(
   {id: "sync-workspace-from-clerk"},
   {event: "clerk/organization.created"},
   async ({event}) => {
-    const {data} = event;
-
-    const owner = await waitForUserSync(data.created_by);
-
-    if (!owner) {
-      throw new Error(`Workspace owner ${data.created_by} is not synced yet.`);
-    }
-
-    await prisma.workspace.upsert({
-      where: {
-        id: data.id,
-      },
-      create: {
-        id: data.id,
-        name: data.name,
-        slug: data.slug,
-        description: data?.description,
-        ownerId: data.created_by,
-        image_url: data.image_url,
-      },
-      update: {
-        name: data.name,
-        slug: data.slug,
-        description: data?.description,
-        ownerId: data.created_by,
-        image_url: data.image_url,
-      },
-    });
-
-    // Add creator as admin member
-    await prisma.workspaceMember.upsert({
-      where: {
-        userId_workspaceId: {
-          userId: data.created_by,
-          workspaceId: data.id,
-        },
-      },
-      update: {
-        role: "ADMIN",
-      },
-      create: {
-        userId: data.created_by,
-        workspaceId: data.id,
-        role: "ADMIN",
-      },
-    });
+    await upsertWorkspaceFromWebhookData(event.data);
   },
 );
 
@@ -136,18 +54,7 @@ const syncWorkspaceUpdation = inngest.createFunction(
   {id: "update-workspace-from-clerk"},
   {event: "clerk/organization.updated"},
   async ({event}) => {
-    const {data} = event;
-    await prisma.workspace.update({
-      where: {
-        id: data.id,
-      },
-      data: {
-        name: data.name,
-        slug: data.slug,
-        description: data?.description,
-        image_url: data.image_url,
-      },
-    });
+    await upsertWorkspaceFromWebhookData(event.data);
   },
 );
 
@@ -155,45 +62,48 @@ const syncWorkspaceDeletion = inngest.createFunction(
   {id: "delete-workspace-with-clerk"},
   {event: "clerk/organization.deleted"},
   async ({event}) => {
-    const {data} = event;
-    await prisma.workspace.delete({
+    await prisma.workspace.deleteMany({
       where: {
-        id: data.id,
+        id: event.data.id,
       },
     });
   },
 );
 
-// Inngest for Workspace Members
+// Inngest functions for Workspace Members
 const syncWorkspaceMemberCreation = inngest.createFunction(
   {id: "sync-workspace-member-from-clerk"},
-  {event: "clerk/organizationInvitation.accepted"},
+  {event: "clerk/organizationMembership.created"},
   async ({event}) => {
-    const {data} = event;
-    const normalizedRole = String(data.role ?? data.role_name ?? "org:member")
-      .replace(/^org:/i, "")
-      .toUpperCase();
-
-    await prisma.workspaceMember.upsert({
-      where: {
-        userId_workspaceId: {
-          userId: data.user_id,
-          workspaceId: data.organization_id,
-        },
-      },
-      update: {
-        role: normalizedRole,
-      },
-      create: {
-        userId: data.user_id,
-        workspaceId: data.organization_id,
-        role: normalizedRole,
-      },
-    });
+    await syncOrganizationMembershipFromWebhookData(event.data);
   },
 );
 
-// Ingest function to send email on task creation
+const syncWorkspaceMemberUpdation = inngest.createFunction(
+  {id: "update-workspace-member-from-clerk"},
+  {event: "clerk/organizationMembership.updated"},
+  async ({event}) => {
+    await syncOrganizationMembershipFromWebhookData(event.data);
+  },
+);
+
+const syncWorkspaceMemberDeletion = inngest.createFunction(
+  {id: "delete-workspace-member-from-clerk"},
+  {event: "clerk/organizationMembership.deleted"},
+  async ({event}) => {
+    await deleteOrganizationMembershipFromWebhookData(event.data);
+  },
+);
+
+const syncAcceptedInvitationFallback = inngest.createFunction(
+  {id: "sync-accepted-workspace-invitation-from-clerk"},
+  {event: "clerk/organizationInvitation.accepted"},
+  async ({event}) => {
+    await syncOrganizationMembershipFromWebhookData(event.data);
+  },
+);
+
+// Inngest function to send email on task creation
 const sendTaskAssignmentEmail = inngest.createFunction(
   {id: "send-task-assignment-mail"},
   {event: "app/task.assigned"},
@@ -207,31 +117,29 @@ const sendTaskAssignmentEmail = inngest.createFunction(
 
     if (!task) return;
 
-    // Send email
     await sendEmail({
       to: task.assignee.email,
       subject: `New Task Assignment in ${task.project.name}`,
       body: buildEmailBody(task, origin),
     });
 
-    // Check if current date is not the same as the due date
     if (new Date(task.due_date).toDateString() !== new Date().toDateString()) {
       await step.sleepUntil("wait-for-due-date", new Date(task.due_date));
 
       await step.run("check-if-task-is-completed", async () => {
-        const task = await prisma.task.findUnique({
+        const currentTask = await prisma.task.findUnique({
           where: {id: taskId},
           include: {assignee: true, project: true},
         });
 
-        if (!task) return;
+        if (!currentTask) return;
 
-        if (!task !== "DONE") {
+        if (currentTask.status !== "DONE") {
           await step.run("send-task-reminder-mail", async () => {
             await sendEmail({
-              to: task.assignee.email,
-              subject: `Reminder for ${task.project.name}`,
-              body: buildEmailBody(task, origin, true),
+              to: currentTask.assignee.email,
+              subject: `Reminder for ${currentTask.project.name}`,
+              body: buildEmailBody(currentTask, origin, true),
             });
           });
         }
@@ -240,7 +148,6 @@ const sendTaskAssignmentEmail = inngest.createFunction(
   },
 );
 
-// Create an empty array where we'll export future Inngest functions
 export const functions = [
   syncUserCreation,
   syncUserDeletion,
@@ -249,5 +156,8 @@ export const functions = [
   syncWorkspaceUpdation,
   syncWorkspaceDeletion,
   syncWorkspaceMemberCreation,
+  syncWorkspaceMemberUpdation,
+  syncWorkspaceMemberDeletion,
+  syncAcceptedInvitationFallback,
   sendTaskAssignmentEmail,
 ];

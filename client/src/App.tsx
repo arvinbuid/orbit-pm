@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import SignInPage from "./components/auth/SignInPage";
 import SignUpPage from "./components/auth/SignUpPage";
 import { AuthenticateWithRedirectCallback, CreateOrganization } from "@clerk/clerk-react";
+import AcceptInvitation from "./pages/AcceptInvitation";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/sign-in' element={<SignInPage />} />
         <Route path='/sign-up' element={<SignUpPage />} />
+        <Route path='/accept-invitation' element={<AcceptInvitation />} />
         <Route path="/sign-in/sso-callback" element={
           <AuthenticateWithRedirectCallback
             signInForceRedirectUrl='/dashboard'
