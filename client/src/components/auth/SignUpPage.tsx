@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const SignUpPage = () => {
     return (
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex justify-center mt-12 md:mt-14 h-screen">
             <div>
                 <Link to='/' className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:font-medium transition-all">
                     <ArrowLeft className="w-3 h-3" />

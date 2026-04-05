@@ -37,7 +37,7 @@ const Home = () => {
                                         New Feature: Chat System
                                     </p>
                                 </div>
-                                <h1 className="text-4xl sm:text-5xl font-bold leading-12 sm:leading-14 text-left">The Productivity App for
+                                <h1 className="text-4xl sm:text-5xl font-bold leading-11 sm:leading-14 text-left">The Productivity App for
                                     Modern Teams
                                 </h1>
                                 <p>
