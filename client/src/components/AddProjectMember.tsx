@@ -23,7 +23,11 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }: AddProjectMemberPro
 
     const id = searchParams.get('id')
     const project = currentWorkspace?.projects.find((p) => p.id === id);
-    const projectMembersEmails = project?.members.map((member) => member.user.email)
+    const projectMembersEmails = project?.members.map((member) => member.user.email);
+    const availableMembers = currentWorkspace?.members.filter(
+        (member) => !projectMembersEmails?.includes(member.user.email)
+    ) ?? [];
+    const hasAvailableMembers = availableMembers.length > 0;
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -87,17 +91,18 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }: AddProjectMemberPro
                             <select
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="pl-10 mt-1 w-full rounded border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 text-sm placeholder-zinc-400 dark:placeholder-zinc-500 py-2 focus:outline-none focus:border-blue-500"
+                                disabled={!hasAvailableMembers}
+                                className="pl-10 mt-1 w-full rounded border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 text-sm placeholder-zinc-400 dark:placeholder-zinc-500 py-2 focus:outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
                                 required
                             >
-                                <option value="">Select a member</option>
-                                {currentWorkspace?.members
-                                    .filter((member) => !projectMembersEmails?.includes(member.user.email))
-                                    .map((member) => (
-                                        <option key={member.user.id} value={member.user.email}>
-                                            {member.user.email}
-                                        </option>
-                                    ))}
+                                <option value="" disabled className="disabled:cursor-not-allowed disabled:opacity-60">
+                                    {hasAvailableMembers ? "Select a member" : "No current members to assign"}
+                                </option>
+                                {availableMembers.map((member) => (
+                                    <option key={member.user.id} value={member.user.email}>
+                                        {member.user.email}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -113,7 +118,7 @@ const AddProjectMember = ({ isDialogOpen, setIsDialogOpen }: AddProjectMemberPro
                         </button>
                         <button
                             type="submit"
-                            disabled={isAdding || !currentWorkspace}
+                            disabled={isAdding || !currentWorkspace || !hasAvailableMembers || !email}
                             className="px-5 py-2 text-sm rounded bg-linear-to-br from-blue-500 to-blue-600 hover:opacity-90 text-white disabled:opacity-50 transition"
                         >
                             {isAdding ? "Adding..." : "Add Member"}
