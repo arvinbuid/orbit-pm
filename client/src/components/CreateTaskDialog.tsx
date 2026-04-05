@@ -69,7 +69,7 @@ const CreateTaskDialog = ({ showCreateTask, setShowCreateTask, projectId }: Crea
 
     return showCreateTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 dark:bg-black/60 backdrop-blur">
-            <div className="bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg shadow-lg w-full max-w-md p-6 text-zinc-900 dark:text-white">
+            <div className="bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-lg shadow-lg w-full max-w-md p-6 text-zinc-900 dark:text-white mx-2">
                 <h2 className="text-xl font-bold mb-4">Create New Task</h2>
 
                 <form
