@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { FormEventHandler } from "react";
+import type { SubmitEventHandler } from "react";
 import { Loader2Icon, LockKeyhole, UserRound } from "lucide-react";
 import { useAuth, useClerk, useOrganizationList, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { getClerkErrorMessage } from "../utils/clerkErrors";
 
 const AcceptInvitation = () => {
     const navigate = useNavigate();
@@ -86,10 +87,9 @@ const AcceptInvitation = () => {
                 }
 
                 setError("Invitation sign-in is incomplete. Please try the link again.");
-            } catch (err: any) {
+            } catch (err: unknown) {
                 if (!cancelled) {
-                    const message = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message;
-                    setError(message || "Unable to complete invitation sign-in.");
+                    setError(getClerkErrorMessage(err, "Unable to complete invitation sign-in."));
                     console.error(err);
                 }
             } finally {
@@ -111,8 +111,8 @@ const AcceptInvitation = () => {
             return;
         }
 
-        completeInvitation().catch((err) => {
-            setError("Unable to finalize the workspace invitation.");
+        completeInvitation().catch((err: unknown) => {
+            setError(getClerkErrorMessage(err, "Unable to finalize the workspace invitation."));
             console.error(err);
         });
     }, [completeInvitation, invitationStatus, isReady, isSignedIn]);
@@ -122,7 +122,7 @@ const AcceptInvitation = () => {
         return "Accept Invitation";
     }, [isSubmitting]);
 
-    const handleSignUp: FormEventHandler<HTMLFormElement> = async (e) => {
+    const handleSignUp: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
 
         if (!token || !isReady) {
@@ -152,9 +152,8 @@ const AcceptInvitation = () => {
             }
 
             setError("Invitation sign-up is incomplete. Please try again.");
-        } catch (err: any) {
-            const message = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message;
-            setError(message || "Unable to complete invitation sign-up.");
+        } catch (err: unknown) {
+            setError(getClerkErrorMessage(err, "Unable to complete invitation sign-up."));
             console.error(err);
         } finally {
             setIsSubmitting(false);
