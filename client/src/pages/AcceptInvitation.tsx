@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEventHandler } from "react";
 import { Loader2Icon, LockKeyhole, UserRound } from "lucide-react";
 import { useAuth, useClerk, useOrganizationList, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -48,7 +48,6 @@ const AcceptInvitation = () => {
                 });
             }
         }
-
         navigate(redirectTo, { replace: true });
     }, [
         invitationStatus,
@@ -59,8 +58,6 @@ const AcceptInvitation = () => {
         setActiveSignUp,
         workspaceId,
     ]);
-
-    console.log(invitationStatus)
 
     useEffect(() => {
         if (!isReady || !token || invitationStatus !== "sign_in" || isSignedIn) {
@@ -125,10 +122,15 @@ const AcceptInvitation = () => {
         return "Accept Invitation";
     }, [isSubmitting]);
 
-    const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
+    const handleSignUp: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
 
         if (!token || !isReady) {
+            return;
+        }
+
+        if (isSignedIn) {
+            setError("There is already an active session in this browser. Sign out and continue with the invited account.");
             return;
         }
 
@@ -181,15 +183,14 @@ const AcceptInvitation = () => {
         );
     }
 
-    if (invitationStatus === "sign_in" && isSignedIn) {
+    if ((invitationStatus === "sign_in" || invitationStatus === "sign_up") && isSignedIn) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950 px-6">
                 <div className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-sm space-y-4">
                     <div>
-                        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Invitation requires sign-in</h1>
+                        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Invitation requires a clean session</h1>
                         <p className="mt-2 text-sm text-gray-600 dark:text-zinc-400">
-                            This invitation link is for an existing account, but there is already an active session in this browser.
-                            Sign out, then continue with the invited account.
+                            There is already an active Clerk session in this browser. Sign out, then continue the invitation with the invited account.
                         </p>
                     </div>
 
