@@ -97,16 +97,20 @@ const RecentActivity = () => {
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-                                                <span className="capitalize">{task.type.toLowerCase()}</span>
+                                                <span className="capitalize">
+                                                    {task.type.toLowerCase()}
+                                                </span>
                                                 {task.assignee && (
                                                     <div className="flex items-center gap-1">
                                                         <div className="w-4 h-4 bg-zinc-300 dark:bg-zinc-700 rounded-full flex items-center justify-center text-[10px] text-zinc-800 dark:text-zinc-200">
                                                             {task.assignee.name[0].toUpperCase()}
                                                         </div>
-                                                        {task.assignee.name}
+                                                        <span className="text-nowrap">
+                                                            {task.assignee.name}
+                                                        </span>
                                                     </div>
                                                 )}
-                                                <span>
+                                                <span className="text-nowrap">
                                                     {format(new Date(task.updatedAt), "MMM d, h:mm a")}
                                                 </span>
                                             </div>
