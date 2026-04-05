@@ -5,9 +5,7 @@ export const workspaceInclude = {
   members: {include: {user: true}},
   projects: {
     include: {
-      tasks: {
-        include: {assignee: true, comments: {include: {user: true}}},
-      },
+      tasks: {include: {assignee: true}},
       members: {include: {user: true}},
     },
   },

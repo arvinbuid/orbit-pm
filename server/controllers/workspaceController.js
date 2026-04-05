@@ -1,6 +1,6 @@
 import {clerkClient} from "@clerk/express";
 import prisma from "../configs/prisma.js";
-import {syncUserWorkspacesFromClerk, workspaceInclude} from "../services/clerkSyncService.js";
+import {workspaceInclude} from "../services/clerkSyncService.js";
 
 const findUserWorkspaces = (userId) =>
   prisma.workspace.findMany({
@@ -19,7 +19,6 @@ export const getUserWorkspaces = async (req, res) => {
       return res.status(401).json({message: "Unauthorized. No valid session."});
     }
 
-    await syncUserWorkspacesFromClerk(userId);
     const workspaces = await findUserWorkspaces(userId);
 
     res.json({workspaces});
