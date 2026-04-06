@@ -1,6 +1,7 @@
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
+import helmet from "helmet";
 import {clerkMiddleware} from "@clerk/express";
 import {serve} from "inngest/express";
 import {inngest, functions} from "./inngest/index.js";
@@ -23,7 +24,27 @@ const configuredOrigins = [
     : ["http://localhost:3000", "http://localhost:5173"]),
 ].filter(Boolean);
 
-app.use(express.json());
+const apiHelmet = helmet({
+  contentSecurityPolicy: {
+    useDefaults: false,
+    directives: {
+      defaultSrc: ["'none'"],
+      baseUri: ["'none'"],
+      frameAncestors: ["'none'"],
+      formAction: ["'none'"],
+      objectSrc: ["'none'"],
+    },
+  },
+  referrerPolicy: {
+    policy: "no-referrer",
+  },
+  xFrameOptions: {
+    action: "deny",
+  },
+});
+
+app.use(apiHelmet); // security headers
+app.use(express.json()); // body parsing
 app.use(
   cors({
     origin(origin, callback) {
@@ -34,9 +55,8 @@ app.use(
       return callback(new Error("Origin not allowed by CORS.")); // block request
     },
   }),
-);
-
-app.use(clerkMiddleware());
+); // CORS
+app.use(clerkMiddleware()); // clerk auth
 
 app.get("/", (req, res) => res.send("Server is live..."));
 
