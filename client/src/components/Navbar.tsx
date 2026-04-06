@@ -1,4 +1,4 @@
-import { SearchIcon, PanelLeft } from 'lucide-react'
+import { PanelLeft } from 'lucide-react'
 import { toggleTheme } from '../features/themeSlice'
 import { MoonIcon, SunIcon } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '../app/hooks';
