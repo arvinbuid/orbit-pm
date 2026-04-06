@@ -95,7 +95,10 @@ function WorkspaceDropdown() {
 
                     <div
                         onClick={() => {
-                            openCreateOrganization();
+                            openCreateOrganization({
+                                afterCreateOrganizationUrl:
+                                    '/dashboard'
+                            });
                             setIsOpen(false);
                         }}
                         className="p-2 cursor-pointer rounded group hover:bg-gray-100 dark:hover:bg-zinc-800"
