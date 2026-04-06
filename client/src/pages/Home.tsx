@@ -32,7 +32,7 @@ const Home = () => {
                 </nav>
                 {/* Hero */}
                 <div className="w-full">
-                    <div className="relative mx-auto max-w-7xl bg-white bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[32px_32px] dark:bg-zinc-950 dark:bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] md:absolute md:inset-0 md:h-[90vh]">
+                    <div className="relative mx-auto max-w-9xl bg-white bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[46px_46px] dark:bg-zinc-950 dark:bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] md:absolute md:inset-0 md:h-[90vh]">
                         <div className="mx-auto grid max-w-6xl grid-cols-1 md:h-[90vh] md:grid-cols-2">
                             {/* Left */}
                             <div className="flex items-center px-6 mt-9 md:mt-0">
