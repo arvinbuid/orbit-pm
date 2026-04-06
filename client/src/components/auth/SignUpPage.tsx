@@ -1,27 +1,25 @@
-import { SignUp } from "@clerk/clerk-react";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ClerkLoaded, ClerkLoading, SignUp } from "@clerk/clerk-react";
+import { Loader2Icon } from "lucide-react";
+import AuthPageWrapper from "./AuthPageWrapper";
 
 const SignUpPage = () => {
     return (
-        <div className="flex justify-center mt-12 md:mt-14 h-screen">
-            <div>
-                <Link to='/' className="flex items-center gap-2">
-                    <ArrowLeft className="w-3 h-3 text-blue-600 hover:text-blue-700 hover:font-medium transition-colors" />
-                    <p className="text-sm text-blue-600 hover:text-blue-700 hover:font-medium transition-colors">Back to Home</p>
-                </Link>
-                <div className="mt-4">
-                    <SignUp
-                        routing="path"
-                        path="/sign-up"
-                        signInUrl="/sign-in"
-                        fallback={<h1>Loading...</h1>}
-                        fallbackRedirectUrl="/dashboard"
-                        forceRedirectUrl="/dashboard"
-                    />
+        <AuthPageWrapper>
+            <ClerkLoading>
+                <div className="flex min-h-128 items-center justify-center rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    <Loader2Icon className="size-6 animate-spin text-blue-600" />
                 </div>
-            </div>
-        </div>
+            </ClerkLoading>
+            <ClerkLoaded>
+                <SignUp
+                    routing="path"
+                    path="/sign-up"
+                    signInUrl="/sign-in"
+                    fallbackRedirectUrl="/dashboard"
+                    forceRedirectUrl="/dashboard"
+                />
+            </ClerkLoaded>
+        </AuthPageWrapper>
     );
 }
 

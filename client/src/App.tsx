@@ -18,9 +18,6 @@ function App() {
       <Toaster />
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/sign-in' element={<SignInPage />} />
-        <Route path='/sign-up' element={<SignUpPage />} />
-        <Route path='/accept-invitation' element={<AcceptInvitation />} />
         <Route path="/sign-in/sso-callback" element={
           <AuthenticateWithRedirectCallback
             signInForceRedirectUrl='/dashboard'
@@ -33,6 +30,9 @@ function App() {
             signUpFallbackRedirectUrl='/dashboard'
           />}
         />
+        <Route path='/sign-in/*' element={<SignInPage />} />
+        <Route path='/sign-up/*' element={<SignUpPage />} />
+        <Route path='/accept-invitation' element={<AcceptInvitation />} />
         <Route
           path="/create-organization"
           element={
