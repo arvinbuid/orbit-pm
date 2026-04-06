@@ -94,33 +94,37 @@ export const updateProject = async (req, res) => {
     const {id, workspaceId, name, description, status, start_date, end_date, progress, priority} =
       req.body;
 
-    // Check if user have admin role for workspace
-    const workspace = await prisma.workspace.findUnique({
-      where: {id: workspaceId},
-      include: {members: {include: {user: true}}},
+    const project = await prisma.project.findUnique({
+      where: {id},
+      include: {
+        workspace: {
+          include: {
+            members: true,
+          },
+        },
+      },
     });
 
-    if (!workspace) {
-      return res.status(404).json({message: "Workspace not found."});
+    if (!project) {
+      return res.status(404).json({message: "Project not found."});
     }
 
-    if (!workspace.members.some((member) => member.userId === userId && member.role === "ADMIN")) {
-      const project = await prisma.project.findUnique({where: {id}});
+    if (workspaceId && workspaceId !== project.workspaceId) {
+      return res.status(400).json({message: "Changing project workspace is not allowed."});
+    }
 
-      if (!project) {
-        return res.status(404).json({message: "Project not found."});
-      } else if (project.team_lead !== userId) {
-        return res
-          .status(403)
-          .json({message: "You do not have permission to update this project."});
-      }
+    const isWorkspaceAdmin = project.workspace.members.some(
+      (member) => member.userId === userId && member.role === "ADMIN",
+    );
+
+    if (!isWorkspaceAdmin && project.team_lead !== userId) {
+      return res.status(403).json({message: "You do not have permission to update this project."});
     }
 
     // Update the project
-    const project = await prisma.project.update({
+    const updatedProject = await prisma.project.update({
       where: {id},
       data: {
-        workspaceId,
         name,
         description,
         status,
@@ -131,7 +135,7 @@ export const updateProject = async (req, res) => {
       },
     });
 
-    res.json({project, message: "Project updated successfully."});
+    res.json({project: updatedProject, message: "Project updated successfully."});
   } catch (error) {
     console.error(error);
     res.status(500).json({message: error.code || error.message});

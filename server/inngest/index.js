@@ -108,7 +108,7 @@ const sendTaskAssignmentEmail = inngest.createFunction(
   {id: "send-task-assignment-mail"},
   {event: "app/task.assigned"},
   async ({event, step}) => {
-    const {taskId, origin} = event.data;
+    const {taskId, appUrl} = event.data;
 
     const task = await prisma.task.findUnique({
       where: {id: taskId},
@@ -120,7 +120,7 @@ const sendTaskAssignmentEmail = inngest.createFunction(
     await sendEmail({
       to: task.assignee.email,
       subject: `New Task Assignment in ${task.project.name}`,
-      body: buildEmailBody(task, origin),
+      body: buildEmailBody(task, appUrl),
     });
 
     if (new Date(task.due_date).toDateString() !== new Date().toDateString()) {
@@ -139,7 +139,7 @@ const sendTaskAssignmentEmail = inngest.createFunction(
             await sendEmail({
               to: currentTask.assignee.email,
               subject: `Reminder for ${currentTask.project.name}`,
-              body: buildEmailBody(currentTask, origin, true),
+              body: buildEmailBody(currentTask, appUrl, true),
             });
           });
         }

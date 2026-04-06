@@ -14,8 +14,27 @@ import commentRouter from "./router/commentRoutes.js";
 
 const app = express();
 
+// Only accept browser requests from the approved frontend URLs
+const configuredOrigins = [
+  process.env.CLIENT_URL,
+  ...(process.env.CORS_ORIGINS || "").split(",").map((origin) => origin.trim()),
+  ...(process.env.NODE_ENV === "production"
+    ? []
+    : ["http://localhost:3000", "http://localhost:5173"]),
+].filter(Boolean);
+
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || configuredOrigins.includes(origin)) {
+        return callback(null, true); // allow request
+      }
+
+      return callback(new Error("Origin not allowed by CORS.")); // block request
+    },
+  }),
+);
 
 app.use(clerkMiddleware());
 

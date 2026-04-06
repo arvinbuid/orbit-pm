@@ -1,6 +1,7 @@
 import {clerkClient} from "@clerk/express";
 import prisma from "../configs/prisma.js";
 import {workspaceInclude} from "../services/clerkSyncService.js";
+import {getClientAppUrl} from "../utils.js";
 
 const findUserWorkspaces = (userId) =>
   prisma.workspace.findMany({
@@ -127,8 +128,7 @@ export const inviteMember = async (req, res) => {
       return res.status(400).json({message: "User is already a member."});
     }
 
-    const origin = req.get("origin") || process.env.CLIENT_URL || "http://localhost:3000";
-    const redirectUrl = new URL("/accept-invitation", origin);
+    const redirectUrl = new URL("/accept-invitation", getClientAppUrl());
     redirectUrl.searchParams.set("workspaceId", workspaceId);
     redirectUrl.searchParams.set("redirectTo", "/team");
 
